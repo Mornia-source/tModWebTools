@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="chrome=1, IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terrasavr Local Mirror</title>
+  <link rel="stylesheet" href="./style.css?v=2" />
+  <style>
+    #noscript {
+      color: white;
+      font: 16px sans-serif;
+      padding: 8px 144px 0 8px;
+    }
+    #noscript a { color: #fe4; }
+    #noscript p { margin: 0; }
+    #noscript p + p { margin-top: 8px; }
+    html, body, .wrapper { overflow: hidden !important; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <script>
+      function winParameters() {
+        return {};
+      }
+      try {
+        var twt = new URLSearchParams(window.location.search).get("twtLang");
+        if (twt === "en") {
+          window.__twtTerrasavrUiLang = "en";
+          document.documentElement.setAttribute("lang", "en");
+        }
+      } catch (_) {}
+    </script>
+    <script type="text/javascript" src="./lang/pako_inflate.min.js"></script>
+    <script type="text/javascript" src="./lib/FileSaver.min.js"></script>
+    <script>
+      // 首次访问默认开启系统字体（避免中文显示为 ??）。
+      // 若用户手动改过设置，则不覆盖。
+      try {
+        var k = "terrasavr.useSystemFont";
+        if (window.localStorage && localStorage.getItem(k) == null) {
+          localStorage.setItem(k, "true");
+        }
+      } catch (_) {}
+    </script>
+    <script type="text/javascript" src="./script.js?v=3"></script>
+    <div id="obot"><div id="bot"></div></div>
+    <noscript><div id="noscript"><p>Please enable JavaScript to use Terrasavr.</p></div></noscript>
+  </div>
+</body>
+</html>

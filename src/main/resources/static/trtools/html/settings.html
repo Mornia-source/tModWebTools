@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-doc="meta.titleSettings">设置 — tModWebTools</title>
+  <script>
+    (function () {
+      try {
+        var lang = localStorage.getItem("trtools.lang") || "zh-CN";
+        var theme = localStorage.getItem("trtools.theme") || "emerald";
+        var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
+        var TBOOT = {
+          "meta.titleHome": { zh: "tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry", en: "tModWebTools — Respecting every developer's wishes — Mornia-Cherry", es: "tModWebTools — Respetando los deseos de cada desarrollador — Mornia-Cherry" },
+          "meta.titleArmor": { zh: "装备帧生成器 — tModWebTools", en: "ArmorHelper — tModWebTools", es: "ArmorHelper — tModWebTools" },
+          "meta.titleOgg": { zh: "OGG 转换 — tModWebTools", en: "OGG convert — tModWebTools", es: "Conversión OGG — tModWebTools" },
+          "meta.titleStats": { zh: "访问统计 — tModWebTools", en: "Visit stats — tModWebTools", es: "Estadísticas de visitas — tModWebTools" },
+          "meta.titleSettings": { zh: "设置 — tModWebTools", en: "Settings — tModWebTools", es: "Ajustes — tModWebTools" },
+          "meta.titleTerrasavr": { zh: "tModWebTools - Terrasavr 存档编辑器", en: "tModWebTools — Terrasavr", es: "tModWebTools — Terrasavr" },
+          "meta.titleTmodUnpacker": { zh: "tModUnpacker — tModWebTools", en: "tModUnpacker — tModWebTools", es: "tModUnpacker — tModWebTools" },
+          "meta.titleSprite": { zh: "躯干格式转换 — tModWebTools", en: "Body sprite transform — tModWebTools", es: "Transformación de sprite corporal — tModWebTools" },
+          "meta.titleTexture": { zh: "物块生成器 — tModWebTools", en: "TextureSplitter — tModWebTools", es: "TextureSplitter — tModWebTools" }
+        };
+        var _tt = document.querySelector("title[data-i18n-doc]");
+        var _key = _tt && _tt.getAttribute("data-i18n-doc");
+        if (_key && TBOOT[_key]) document.title = TBOOT[_key][lt];
+        document.documentElement.setAttribute("lang", lang === "zh-CN" ? "zh-CN" : lang === "es" ? "es" : "en");
+        document.documentElement.setAttribute("data-trtheme", theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preload" href="/trtools/css/trtools.css?v=16" as="style" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></noscript>
+  <link rel="stylesheet" href="/trtools/css/trtools.css?v=16" />
+  <link rel="stylesheet" href="/trtools/css/trthemes.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="img/cache-logo.svg" />
+</head>
+<body class="appBody">
+  <div class="bgFx" aria-hidden="true"></div>
+  <div class="appShell" id="appShell">
+    <aside class="appSidebar" id="appSidebar">
+      <div class="appSidebarInner">
+        <div class="appSidebarHeader">
+          <div class="appSidebarBrand" data-i18n="brand.short">tModWebTools - TWT</div>
+        </div>
+        <nav class="appNav" data-i18n-aria="nav.aria" aria-label="工具导航">
+          <a class="appNavLink pageTab" href="./index.html"><img class="tabIcon" src="/trtools/img/Tilesheet.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.tilesheet">切片图工具</span></a>
+          <a class="appNavLink pageTab" href="./armorhelper.html"><img class="tabIcon" src="img/ArmorHelper.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.armor">装备帧生成器</span></a>
+          <a class="appNavLink pageTab" href="./spritetransform.html"><img class="tabIcon" src="img/SpriteTransform.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.sprite">躯干格式转换器</span></a>
+          <a class="appNavLink pageTab" href="./oggconvert.html"><img class="tabIcon" src="img/OGG.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.ogg">OGG 转换</span></a>
+          <a class="appNavLink pageTab" href="./texturesplitter.html"><img class="tabIcon" src="img/TextureSplitter.ico" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.texture">物块生成器</span></a>
+          <a class="appNavLink pageTab" href="./tmodunpacker.html"><img class="tabIcon" src="img/14248019.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.tmod">.tMod 文件解包</span></a>
+          <a class="appNavLink pageTab" href="./terrasavr.html"><img class="tabIcon" src="/trtools/img/terrasavr-favicon.ico" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.terrasavr">角色存档编辑器</span></a>
+        </nav>
+        <div class="appSidebarFooter">
+          <div class="appSidebarFooterRow">
+            <a class="appNavLink appNavLink--settings appNavLink--settings--icon appNavLink--settingsActive" href="./settings.html" aria-current="page" data-page="settings" data-i18n-title="footer.settings" data-i18n-aria="footer.settings" title="设置" aria-label="设置">
+              <i class="fas fa-cog" aria-hidden="true"></i>
+            </a>
+            <a class="appNavLink appNavLink--stats" href="./stats.html">
+              <i class="fas fa-chart-line" aria-hidden="true"></i>
+              <span data-i18n="footer.stats">访问统计</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <main class="appMain">
+      <div class="appMainInner">
+        <div class="appTopBar card panel">
+          <button type="button" class="sidebarToggle" id="sidebarToggle" aria-label="收起侧边栏" aria-expanded="true" aria-controls="appSidebar">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="appTopBarMain">
+            <h1 data-i18n="settings.h1">设置</h1>
+            <div class="hint" style="margin-top:4px" data-i18n="settings.sub">语言与主题仅保存在本机浏览器。</div>
+          </div>
+          <div class="appTopBarEnd">
+            <div class="onlineBlock">
+              <div class="online" data-i18n-title="online.tooltipDefault">
+                <span data-i18n="online.prefix">当前在线</span> <span id="onlineCount">-</span> <span data-i18n="online.suffix">人</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="card panel">
+          <div class="sectionTitle" data-i18n="settings.langTitle">界面语言</div>
+          <div class="settingsLangRow" id="settingsLangRow" role="group" data-i18n-aria="settings.langTitle" aria-label="界面语言">
+            <button type="button" class="btn secondary settingsLangBtn" data-lang="zh-CN" aria-pressed="true" data-i18n="settings.langZh">简体中文</button>
+            <button type="button" class="btn secondary settingsLangBtn" data-lang="en" aria-pressed="false" data-i18n="settings.langEn">English</button>
+            <button type="button" class="btn secondary settingsLangBtn" data-lang="es" aria-pressed="false" data-i18n="settings.langEs">Español</button>
+          </div>
+        </section>
+
+        <section class="card panel" style="margin-top:16px">
+          <div class="sectionTitle" data-i18n="settings.themeTitle">主题色</div>
+          <div class="settingsSwatchRow" id="themeSwatches" role="group" data-i18n-aria="settings.themeTitle" aria-label="主题色">
+            <button type="button" class="settingsSwatch" data-theme="emerald" style="background:#3bbf7a" title="Emerald" aria-pressed="false" data-i18n-title="settings.themeEmerald"></button>
+            <button type="button" class="settingsSwatch" data-theme="ocean" style="background:#2563eb" title="Ocean" aria-pressed="false" data-i18n-title="settings.themeOcean"></button>
+            <button type="button" class="settingsSwatch" data-theme="violet" style="background:#8b5cf6" title="Violet" aria-pressed="false" data-i18n-title="settings.themeViolet"></button>
+            <button type="button" class="settingsSwatch" data-theme="amber" style="background:#f59e0b" title="Amber" aria-pressed="false" data-i18n-title="settings.themeAmber"></button>
+            <button type="button" class="settingsSwatch" data-theme="rose" style="background:#f43f5e" title="Rose" aria-pressed="false" data-i18n-title="settings.themeRose"></button>
+            <button type="button" class="settingsSwatch" data-theme="teal" style="background:#0d9488" title="Teal" aria-pressed="false" data-i18n-title="settings.themeTeal"></button>
+          </div>
+        </section>
+
+        <section class="settingsAuthor card panel" style="margin-top:16px">
+          <h2 data-i18n="settings.aboutTitle">关于本站</h2>
+          <p style="margin:0 0 10px" data-i18n="settings.aboutBody"></p>
+          <p style="margin:0;font-weight:700" data-i18n="settings.authorLine"></p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <button class="toTop" id="toTop" type="button" data-i18n-title="toTop" data-i18n-aria="toTop" title="回到顶部" aria-label="回到顶部">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script defer src="/trtools/js/i18n-es.js?v=3"></script>
+  <script defer src="/trtools/js/i18n.js?v=6"></script>
+  <script defer src="/trtools/js/hot-switch.js?v=5"></script>
+  <script defer src="/trtools/js/app-shell.js?v=7"></script>
+  <script defer src="/trtools/js/visit-track.js?v=1"></script>
+  <script defer src="/trtools/js/online_client.js"></script>
+  <script defer src="/trtools/js/settings-page.js?v=3"></script>
+  <script>
+    (function () {
+      var toTop = document.getElementById("toTop");
+      if (!toTop) return;
+      window.addEventListener(
+        "scroll",
+        function () {
+          toTop.style.display = window.scrollY > 500 ? "flex" : "none";
+        },
+        { passive: true }
+      );
+      toTop.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    })();
+  </script>
+</body>
+</html>

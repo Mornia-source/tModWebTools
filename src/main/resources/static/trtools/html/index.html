@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-doc="meta.titleHome">tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry</title>
+  <script>
+    (function () {
+      try {
+        var lang = localStorage.getItem("trtools.lang") || "zh-CN";
+        var theme = localStorage.getItem("trtools.theme") || "emerald";
+        var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
+        var TBOOT = {
+          "meta.titleHome": { zh: "tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry", en: "tModWebTools — Respecting every developer's wishes — Mornia-Cherry", es: "tModWebTools — Respetando los deseos de cada desarrollador — Mornia-Cherry" },
+          "meta.titleArmor": { zh: "装备帧生成器 — tModWebTools", en: "ArmorHelper — tModWebTools", es: "ArmorHelper — tModWebTools" },
+          "meta.titleOgg": { zh: "OGG 转换 — tModWebTools", en: "OGG convert — tModWebTools", es: "Conversión OGG — tModWebTools" },
+          "meta.titleStats": { zh: "访问统计 — tModWebTools", en: "Visit stats — tModWebTools", es: "Estadísticas de visitas — tModWebTools" },
+          "meta.titleSettings": { zh: "设置 — tModWebTools", en: "Settings — tModWebTools", es: "Ajustes — tModWebTools" },
+          "meta.titleTerrasavr": { zh: "tModWebTools - Terrasavr 存档编辑器", en: "tModWebTools — Terrasavr", es: "tModWebTools — Terrasavr" },
+          "meta.titleTmodUnpacker": { zh: "tModUnpacker — tModWebTools", en: "tModUnpacker — tModWebTools", es: "tModUnpacker — tModWebTools" },
+          "meta.titleSprite": { zh: "躯干格式转换 — tModWebTools", en: "Body sprite transform — tModWebTools", es: "Transformación de sprite corporal — tModWebTools" },
+          "meta.titleTexture": { zh: "物块生成器 — tModWebTools", en: "TextureSplitter — tModWebTools", es: "TextureSplitter — tModWebTools" }
+        };
+        var _tt = document.querySelector("title[data-i18n-doc]");
+        var _key = _tt && _tt.getAttribute("data-i18n-doc");
+        if (_key && TBOOT[_key]) document.title = TBOOT[_key][lt];
+        document.documentElement.setAttribute("lang", lang === "zh-CN" ? "zh-CN" : lang === "es" ? "es" : "en");
+        document.documentElement.setAttribute("data-trtheme", theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preload" href="/trtools/css/trtools.css?v=16" as="style" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></noscript>
+  <link rel="stylesheet" href="/trtools/css/trtools.css?v=16" />
+  <link rel="stylesheet" href="/trtools/css/trthemes.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="img/cache-logo.svg" />
+</head>
+<body class="appBody">
+  <div class="bgFx" aria-hidden="true"></div>
+  <div class="appShell" id="appShell">
+    <aside class="appSidebar" id="appSidebar">
+      <div class="appSidebarInner">
+        <div class="appSidebarHeader">
+          <div class="appSidebarBrand" data-i18n="brand.short">tModWebTools - TWT</div>
+        </div>
+        <nav class="appNav" data-i18n-aria="nav.aria" aria-label="工具导航">
+          <a class="appNavLink pageTab active" href="./index.html" aria-current="page"><img class="tabIcon" src="/trtools/img/Tilesheet.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.tilesheet">切片图工具</span></a>
+          <a class="appNavLink pageTab" href="./armorhelper.html"><img class="tabIcon" src="img/ArmorHelper.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.armor">装备帧生成器</span></a>
+          <a class="appNavLink pageTab" href="./spritetransform.html"><img class="tabIcon" src="img/SpriteTransform.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.sprite">躯干格式转换器</span></a>
+          <a class="appNavLink pageTab" href="./oggconvert.html"><img class="tabIcon" src="img/OGG.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.ogg">OGG 转换</span></a>
+          <a class="appNavLink pageTab" href="./texturesplitter.html"><img class="tabIcon" src="img/TextureSplitter.ico" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.texture">物块生成器</span></a>
+          <a class="appNavLink pageTab" href="./tmodunpacker.html"><img class="tabIcon" src="img/14248019.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.tmod">.tMod 文件解包</span></a>
+          <a class="appNavLink pageTab" href="./terrasavr.html"><img class="tabIcon" src="/trtools/img/terrasavr-favicon.ico" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span data-i18n="nav.terrasavr">角色存档编辑器</span></a>
+        </nav>
+        <div class="appSidebarFooter">
+          <div class="appSidebarFooterRow">
+            <a class="appNavLink appNavLink--settings appNavLink--settings--icon" href="./settings.html" data-page="settings" data-i18n-title="footer.settings" data-i18n-aria="footer.settings" title="设置" aria-label="设置">
+              <i class="fas fa-cog" aria-hidden="true"></i>
+            </a>
+            <a class="appNavLink appNavLink--stats" href="./stats.html">
+              <i class="fas fa-chart-line" aria-hidden="true"></i>
+              <span data-i18n="footer.stats">访问统计</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <main class="appMain">
+      <div class="appMainInner">
+        <div class="appTopBar card panel">
+          <button type="button" class="sidebarToggle" id="sidebarToggle" aria-label="收起侧边栏" aria-expanded="true" aria-controls="appSidebar">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="appTopBarMain">
+            <h1 data-i18n="tsheet.h1">Tilesheet 切片图工�?v26.5.0</h1>
+          </div>
+          <div class="appTopBarEnd">
+            <div class="onlineBlock">
+              <div class="online" data-i18n-title="online.tooltipIndex">
+                <span data-i18n="online.prefix">当前在线</span> <span id="onlineCount">-</span> <span data-i18n="online.suffix">人</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="wrap">
+          <div class="appModeTabs card panel">
+            <div class="tabs" id="tabs">
+              <button class="tab active" type="button" data-mode="build" data-i18n="tsheet.tabBuild">切片�</button>
+              <button class="tab" type="button" data-mode="stitch" data-i18n="tsheet.tabStitch">切片图还�</button>
+              <button class="tab" type="button" data-mode="gif2sheet" data-i18n="tsheet.tabGif2">GIF转精灵图</button>
+              <button class="tab" type="button" data-mode="sheet2gif" data-i18n="tsheet.tabSheet2">精灵图转GIF</button>
+              <button class="tab" type="button" data-mode="compose" data-i18n="tsheet.tabCompose">单帧拼精灵图</button>
+              <button class="tab" type="button" data-mode="split" data-i18n="tsheet.tabSplit">精灵分解�</button>
+            </div>
+          </div>
+    <section class="card left">
+      <div class="sectionTitle" data-i18n="tsheet.input">输入</div>
+      <div class="drop" id="drop">
+        <div style="font-weight:800" data-i18n="tsheet.dropMain">拖拽图片到这�</div>
+        <div class="hint" id="dropHint">或点击选择。支持多张图片（按顺序作为动画帧�</div>
+        <input id="file" type="file" accept="image/*" multiple style="display:none" />
+        <div class="row">
+          <button class="btn" id="pick" type="button"><i class="fas fa-images" style="margin-right:8px"></i><span data-i18n="tsheet.pick">选择图片</span></button>
+          <button class="btn secondary" id="clear" type="button"><i class="fas fa-trash" style="margin-right:8px"></i><span data-i18n="tsheet.clear">清空</span></button>
+        </div>
+        <ul class="fileList" id="fileList" style="display:none"></ul>
+      </div>
+      <div id="panel-build" class="modePanel active">
+        <div class="sectionTitle" data-i18n="tsheet.params">参数</div>
+        <div class="grid">
+          <div>
+            <label data-i18n="tsheet.lblTile">tile 大小</label>
+            <div class="inputPx">
+              <input type="number" id="tile" value="16" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.lblGap">gap</label>
+            <div class="inputPx">
+              <input type="number" id="gap" value="1" min="0" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="cropTransparent" checked />
+              <span data-i18n="tsheet.cropTransparent">裁剪透明外边框（推荐�</span>
+            </label>
+            <div class="hint" style="margin-top:6px" data-i18n="tsheet.cropHint">自动裁掉每帧四周全透明边距</div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.padRight">扩展右侧（tile�</label>
+            <input type="number" id="padRightTiles" value="0" min="0" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.padBottom">扩展底部（tile�</label>
+            <input type="number" id="padBottomTiles" value="0" min="0" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.padMode">补齐方式</label>
+            <select id="padMode">
+              <option value="topleft" data-i18n="tsheet.padTopLeft">左上对齐</option>
+              <option value="center" data-i18n="tsheet.padCenter">居中补齐</option>
+              <option value="centerBottom" selected data-i18n="tsheet.padCenterBottom">水平居中 + 居下</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="tsheet.outName">输出文件�</label>
+            <input type="text" id="outName" class="textInput" value="tilesheet_gap1.png" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.cols">期望 cols（可选）</label>
+            <input type="number" id="cols" value="0" min="0" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.rows">期望 rows（可选）</label>
+            <input type="number" id="rows" value="0" min="0" step="1" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="build" type="button"><i class="fas fa-magic" style="margin-right:8px"></i><span data-i18n="tsheet.preview">生成预览</span></button>
+          <button class="btn secondary" id="download" type="button" disabled><i class="fas fa-download" style="margin-right:8px"></i><span data-i18n="tsheet.downloadPng">下载 PNG</span></button>
+          <span class="small" id="busy" style="display:none" data-i18n="tsheet.busy">处理中�</span>
+        </div>
+      </div>
+      <div id="panel-stitch" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.stitchTitle">切片图还原（去间隙）</div>
+        <div class="hint" data-i18n="tsheet.stitchHint">按透明像素识别间隙�?行并移除</div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.alphaStitch">空白判定 Alpha 阈�</label>
+            <input type="number" id="alphaThresholdStitch" value="0" min="0" max="255" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.minSeam">最小间隙宽�</label>
+            <div class="inputPx">
+              <input type="number" id="minSeamStitch" value="1" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn secondary" id="stitch" type="button"><i class="fas fa-layer-group" style="margin-right:8px"></i><span data-i18n="tsheet.runStitch">开始还�</span></button>
+          <button class="btn secondary" id="downloadStitch" type="button" disabled><i class="fas fa-download" style="margin-right:8px"></i><span data-i18n="tsheet.downloadPng">下载 PNG</span></button>
+        </div>
+      </div>
+      <div id="panel-split" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.splitTitle">精灵分解帧（ZIP�</div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.alphaStitch">空白判定 Alpha 阈�</label>
+            <input type="number" id="alphaThresholdSplit" value="0" min="0" max="255" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.minSeam">最小间隙宽�</label>
+            <div class="inputPx">
+              <input type="number" id="minSeamSplit" value="1" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.splitAxis">切分方向</label>
+            <select id="splitAxis">
+              <option value="x" selected data-i18n="tsheet.splitAxisX">横向（按透明竖缝切分�</option>
+              <option value="y" data-i18n="tsheet.splitAxisY">纵向（按透明横缝切分�</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="splitCrop" checked />
+              <span data-i18n="tsheet.splitCrop">切分后裁剪透明外边�</span>
+            </label>
+          </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="splitZip" />
+              <span data-i18n="tsheet.splitZip">打包�?ZIP</span>
+            </label>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn secondary" id="split" type="button"><i class="fas fa-cut" style="margin-right:8px"></i><span data-i18n="tsheet.runSplit">开始切分并下载</span></button>
+        </div>
+      </div>
+      <div id="panel-compose" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.composeTitle">单帧拼精灵图</div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.composeGap">图片间距（px�</label>
+            <input type="number" id="composeGap" value="2" min="0" step="1" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn secondary" id="compose" type="button"><i class="fas fa-stream" style="margin-right:8px"></i><span data-i18n="tsheet.runCompose">开始拼�</span></button>
+          <button class="btn secondary" id="downloadCompose" type="button" disabled><i class="fas fa-download" style="margin-right:8px"></i><span data-i18n="tsheet.downloadPng">下载 PNG</span></button>
+        </div>
+      </div>
+      <div id="panel-gif2sheet" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.gif2Title">GIF转精灵图</div>
+        <div class="hint" data-i18n-html="tsheet.gif2Hint">与「单帧拼精灵图」相同排布：各帧统一画布宽度、竖向堆叠。需浏览器支�?<code>ImageDecoder</code>（推�?Chrome / Edge）�</div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.frameGap">帧间距（px�</label>
+            <input type="number" id="gif2sheetGap" value="2" min="0" step="1" />
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:22px">
+          <button class="btn secondary" id="gif2sheetRun" type="button"><i class="fas fa-film" style="margin-right:8px"></i><span data-i18n="tsheet.gif2Run">解码并生成预�</span></button>
+          <button class="btn secondary" id="downloadGif2sheet" type="button" disabled><i class="fas fa-download" style="margin-right:8px"></i><span data-i18n="tsheet.downloadPng">下载 PNG</span></button>
+        </div>
+      </div>
+      <div id="panel-sheet2gif" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.sheet2Title">精灵图转GIF</div>
+        <div class="hint" data-i18n-html="tsheet.sheet2Hint">适用于「单帧拼精灵图」或本页「GIF转精灵图」生成的竖条：各帧等高、中间为透明或纯色间隙。输�?GIF 需联网加载 <code>gifenc</code> 编码库（约数 KB）�</div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.frameH">每帧高度（px�</label>
+            <input type="number" id="sheet2gifFrameH" value="32" min="1" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.frameGap">帧间距（px�</label>
+            <input type="number" id="sheet2gifGap" value="2" min="0" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.frameCount">帧数�?=自动�</label>
+            <input type="number" id="sheet2gifCount" value="0" min="0" step="1" />
+          </div>
+          <div>
+            <label data-i18n="tsheet.delayMs">每帧延时（ms�</label>
+            <input type="number" id="sheet2gifDelay" value="100" min="20" step="10" />
+          </div>
+        </div>
+        <div class="toolbar" style="margin-top:22px">
+          <button class="btn secondary" id="sheet2gifRun" type="button"><i class="fas fa-file-video" style="margin-right:8px"></i><span data-i18n="tsheet.sheet2Run">生成并下�?GIF</span></button>
+        </div>
+      </div>
+      <div class="status" id="status"></div>
+      <div class="kv" id="kv" style="display:none"></div>
+    </section>
+    <section class="card right">
+      <div class="sectionTitle" data-i18n="tsheet.outPreview">输出预览</div>
+      <label class="small inline">
+        <input type="checkbox" id="previewGrid" />
+        <span data-i18n="tsheet.previewGrid">显示像素窗格（预览）</span>
+      </label>
+      <div class="materialPreviewFrame previewFrame previewFrame--empty" id="tilesheetPreviewHost">
+        <canvas id="preview" width="16" height="16"></canvas>
+      </div>
+    </section>
+        </div>
+        <div class="footer">
+          <div data-i18n="footer.credit">tModLoader ArknightsMod - Mornia-Cherry</div>
+          <div>
+            <span style="margin-right:10px;" data-i18n="footer.contact">联系我</span>
+            <a href="https://steamcommunity.com/id/1594962681/" target="_blank" rel="noopener noreferrer">Steam</a>
+            <span style="margin:0 8px;opacity:.65;">|</span>
+            <a href="https://space.bilibili.com/356597012" target="_blank" rel="noopener noreferrer" data-i18n="footer.bilibili">哔哩哔哩</a>
+          </div>
+          <div class="bugFeedbackRow" lang="zh-CN">
+            <span class="bugFeedbackWrap">
+              <span class="bugFeedbackText" tabindex="0" role="note" data-i18n="footer.bug">BUG反馈</span>
+              <span class="bugFeedbackShot" aria-hidden="true">
+                <img class="bugFeedbackImg" src="/trtools/img/bug-feedback-snipaste.jpg" alt="" loading="lazy" decoding="async" />
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <button class="toTop" id="toTop" type="button" data-i18n-title="toTop" data-i18n-aria="toTop" title="回到顶部" aria-label="回到顶部">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script defer src="/trtools/js/i18n-es.js?v=3"></script>
+  <script defer src="/trtools/js/i18n.js?v=6"></script>
+  <script defer src="/trtools/js/hot-switch.js?v=5"></script>
+  <script defer src="/trtools/js/app-shell.js?v=7"></script>
+  <script defer src="/trtools/js/visit-track.js?v=1"></script>
+  <script defer src="/trtools/js/trtools.js?v=7"></script>
+</body>
+</html>

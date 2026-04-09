@@ -1,0 +1,867 @@
+<html><head>
+<title>Terrasavr documentation</title>
+<style type="text/css">
+body {
+	background: #405070;
+	font: 15px sans-serif;
+	line-height: 1.25;
+	color: white;
+	min-width: 600px;
+}
+p {
+	margin: 0 0 4px 0;
+}
+#doc {
+	background: #1A202D;
+	margin: 20px auto;
+	max-width: 860px;
+	width: 100%;
+	padding: 10px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+}
+#doc td {
+	vertical-align: top;
+	padding: 0;
+}
+article {
+	display: none;
+}
+article[selected] {
+	display: block;
+}
+a, a:visited {
+	color: #9DEC76;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+h1, h2, h3 {
+	font-weight: normal;
+	margin: 8px 0 4px 0;
+	border-bottom: 1px solid #374350;
+}
+h1 {
+	font-size: 27px;
+	line-height: 40px;
+}
+h2 {
+	font-size: 22px;
+	margin-top: 16px;
+}
+ul, ol {
+	margin: 4px 0;
+	padding-left: 24px;
+}
+li {
+	
+}
+blockquote {
+	margin: 4px 0 4px 16px;
+	font-style: italic;
+}
+footer {
+	text-align: center;
+	font-size: 12px;
+	margin-top: 10px;
+}
+footer > hr {
+	border: 0;
+	border-top: 1px solid #374350;
+	margin: 0 20px;
+	margin-bottom: 4px;
+}
+#doc #side {
+	height: 600px;
+}
+.adsbygoogle {
+	position: fixed;
+	margin-left: 5px;
+}
+</style>
+</head><body>
+<table id="doc">
+<td>
+<header>
+	<a href="/r/terrasavr">Terrasavr</a>
+	&#187; <a href="?">documentation</a>
+</header>
+
+<noscript><style type="text/css">
+/* If JavaScript is off, just display everything and hide "loading" */
+article {
+	display: block;
+}
+#loading {
+	display: none;
+}
+h1 {
+	padding-top: 10px;
+}
+/* no ads: */
+#side { width: 0; height: 0 }
+body { min-width: inherit }
+#doc { max-width: 700px }
+</style><article>
+	JavaScript appears to be disabled so here's the "wall of text" version of the manual.
+</article></noscript>
+
+<article id="loading" selected>
+	Loading, please wait...
+</article>
+
+<article id="default">
+<h1><a href="#default">
+	Table of Contents
+</a></h1><p>
+	This is a set of pages intended to serve as a user manual \ FAQ for Terrasavr.
+</p><p>
+	If there are particular questions that are not covered here, you can also <a href="#contact">contact me</a>.
+</p><h2>
+	Pages by categories:
+</h2><p>Saving and loading:<ul>
+	<li><a href="#io-where">Locating PLR files</a></li>
+	<li><a href="#io-loading">Troubleshooting loading problems</a></li>
+	<li><a href="#io-saving">Troubleshooting saving problems</a></li>
+</ul><p>
+Using Terrasavr:<ul>
+	<li><a href="#use-character">Editing the character</a></li>
+	<li><a href="#use-items">Editing items</a></li>
+	<li><a href="#use-buffs">Editing buffs</a></li>
+	<li><a href="#use-worlds">Editing spawnpoints</a></li>
+	<li><a href="#download">Downloading / offline use</a></li>
+	<li><a href="#mobile">Using Terrasavr on iOS/Android</a></li>
+	<li><a href="#console">Terrasavr and console versions</a></li>
+</ul><p>
+Misc:<ul>
+	<li><a href="#versions">Supported game versions/platforms</a></li>
+	<li><a href="#flash">On the Flash version</a></li>
+	<li><a href="#feature-requests">Feature requests / roadmap</a></li>
+	<li><a href="#motivation">Intents &amp; motivation</a></li>
+</ul>
+<b>New!</b> <a href="#loc">Translating Terrasavr</a>
+</article>
+
+<article id="io-where">
+<h1><a href="#io-where">
+	Locating PLR files
+</a></h1><p>
+	"PLR" (short for "Player"?) is the file extension used by Terraria when storing character information. The files themselves are small (usually under 10KB) and contain tightly packed information about the character's stats, visuals, inventory contents, and few other things.
+</p><p>
+	Whereabouts of the files vary by platform:
+</p>
+<h2>
+	Windows
+</h2><p>
+	Saved characters in Terraria for Windows are located in
+	<blockquote>
+		My Documents &#187; My Games &#187; Terraria &#187; Players
+	</blockquote>
+	Most often these are in your "personal" folder (as opposed to "shared" folders).
+</p><p>
+	If needed, you can also quickly bring up this location via "Run" or "Explorer" by using a relative address:
+	<blockquote>
+		%UserProfile%\Documents\My Games\Terraria\Players
+	</blockquote>
+</p>
+<h2>
+	Mac
+</h2><p>
+	Saved characters in Terraria for Mac are located in
+	<blockquote>
+		~/Library/Application Support/Terraria/Players
+	</blockquote>
+	The easiest way to get there is:
+</p><ol>
+	<li>Open "Finder"</li>
+	<li>Pick menu "Go - Go to Folder..."</li>
+	<li>Paste the said address</li>
+	<li>Press the "Go" button</li>
+</ol><p>
+	Alternatively you may use the search feature in "Finder" to locate the folder.
+</p>
+<h2>
+	Linux
+</h2><p>
+	Saved characters in Terraria for Linux are located in
+	<blockquote>
+		~/.local/share/Terraria/Players
+	</blockquote>
+	You can usually "cd" there just fine. If using a file manager application, the process is as following:
+</p><ol>
+	<li>Open your "home" folder in the file manager of choice.</li>
+	<li>Enable display of hidden files if not done already (default Ctrl+H)</li>
+	<li>Navigate to ".local" &#187; "share" &#187; "Terraria" &#187; Players</li>
+</ol><p>
+	Depending on your configuration, the files may instead reside in
+	<blockquote>$XDG_DATA_HOME/Terraria/Players</blockquote>
+</p>
+<h2>
+	iOS/Android
+</h2><p>
+	(see the <a href="#mobile">Mobile section</a>)
+</p>
+<h2>
+	Use with Terrasavr
+</h2><p>
+	Usually you should be able to navigate to the saved characters folder directly from the browser's "file picker" dialog.
+</p><p>
+	If that is not possible, you can often copy the file path to clipboard (e.g. "C:/.../Terraria/Players/Yellow.plr") and paste it into the dialog.
+</p><p>
+	If that is not possible either (or unnecessarily complicated), you can copy the file(s) into an easily accessible location, work with file(s) there, and copy the file(s) back afterwards.
+</p>
+</article>
+
+<article id="io-loading">
+<h1><a href="#io-loading">
+	Troubleshooting loading problems
+</a></h1><p>
+	This page houses a list of common problems that you may encounter while loading files and their resolutions.
+</p><h2>
+	"Failed to dispatch FileReader"
+</h2><p>
+	Means that program has received the file, but could not read it due to certain functionality not being present in the browser. Resolved by using the <a href="#flash">Flash version</a>, but trying a different (newer) browser also may work.
+</p><h2>
+	"The file is empty"
+</h2><p>
+	Quite literally, means that the file uploaded contains nothing inside (size is 0KB).<br>
+	Usually a result of the file going corrupt before the game has decided that there's nothing left to fix in it. Try loading the backup versions (.bak) if there are any.
+</p><h2>
+	"That doesn't look like a valid character file"
+</h2><p>
+	Due to how the game encodes\decodes the files, their size (in bytes) can only be a multiplier of 16. This error means that the chosen file's size isn't, most likely due to corruption or otherwise missing fragments.
+</p><h2>
+	"Failed to load profile. The error was ..."
+</h2><p>
+	Is an error from the underlying file reading routines. If neither the regular nor <a href="#flash">Flash</a> versions can load the file, it usually means that it is corrupt or in wrong format (for example, mods may have an incompatible format for files).
+</p>
+</article>
+
+<article id="io-saving">
+<h1><a href="#io-saving">
+	Troubleshooting saving problems
+</a></h1><p>
+	This page houses a list of common problems that you may encounter while saving files and their resolutions.
+</p>
+<h2 id="io-saving-nothing-happens">
+	Nothing happens upon clicking "Save"
+</h2><p>
+	Usually means that either:
+</p><ol>
+	<li>The browser had skipped the file dialog and sent the file to the "Downloads" folder.
+	<br>Check your downloads and copy the file from there if that's so.</li>
+	<li>The browser had ignored the incoming file alltogether.</li>
+</ol><p>
+	Trying the <a href="#flash">Flash version</a> or a different browser may help.
+</p>
+<h2 id="io-saving-new-tab">
+	The browser opens a new tab with gibberish text
+</h2><p>
+	Means that your browser, for some reason (perhaps extension being shared with something else), had decided to display the incoming PLR file as text instead (which it isn't). You should be able to "save" (default Ctrl+S) the opened file just fine.
+</p>
+<h2 id="io-saving-blank-tab">
+	The browser opens a blank tab (without anything in it)
+</h2><p>
+	This is an issue that occurs on certain versions of Safari on Mac - the browser, for reasons uncertain, may not understand that it was given a file and is supposed to be displaying a dialog for letting the user choose where to save it.
+</p><p>
+	While I'm yet to find a solution (if any) to this on program's side, there are a couple of possible workarounds:
+</p><ol>
+	<li><a href="#flash">Use the flash version</a>. The Flash Player provides it's own file dialogs, and can be trusted with the task of successfully showing them.</li>
+	<li>If you can not (or do not want to) install the Flash Player to run the Flash version, download <a href="//www.adobe.com/support/flashplayer/debug_downloads.html">a standalone Flash Player</a> ("Flash Player Projector") and use it to open <a href="#download">the downloadable SWF</a> of Terrasavr.</li>
+	<li>If you cannot do that either, try a different browser. Should you be wondering, you can also find portable\standalone browsers for Mac.</li>
+</ol>
+<h2 id="io-saving-corrupt">
+	The game considers the edited character corrupt
+</h2><p>
+	If the character <i>wasn't</i> corrupt before opening it with the Terrasavr, it may mean that you've found a bug in the program. If you can <a href="#contact">send me a copy</a> of the initial (.plr\.bak) and the corrupt (.plr) files along with a short description of what you were doing, that'd be nice (and I would have a chance to fix the problem).
+</p>
+<h2 id="io-saving-no-changes">
+	The game ignores the changes to the character
+</h2><p>
+	Make sure that the game is closed or is at the title screen while editing.
+</p><ul>
+	<li>If the character was open in-game, the game will overwrite the changes when exiting back to the menu.</li>
+	<li>The character selection screen will not automatically notice the changes, as it essentially loads all player files (to display the miniatures) when it is opened.</li>
+</ul>
+<h2 id="io-saving-unstable-game">
+	The game crashes time to time \ on "Exit and Save"
+</h2><p>
+	This is a very rare problem related to the browser sometimes setting the downloaded files as "read-only". Open "Properties" for both .plr and .bak files and untick the "read-only" checkbox if it is set and apply changes.
+</p>
+<h2 id="io-saving-things-missing">
+	Some of the added items\stats\... are missing
+</h2><p>
+	While you may change the character file pretty much as you please (and Terrasavr helps with that), the game reserves the right to ignore the changes as it sees fit:
+</p><ul>
+	<li>There are limits to the maximum amount of health\mana that a character can have. Mods may change or lift the limitations.</li>
+	<li>"Equip" (armor\accessory\social\dye\misc) slots can only house single-item stacks.</li>
+	<li>Not every item can receive every prefix.</li>
+	<li>Items have a maximum stack size and usually cannot be stacked past that.</li>
+	<li>Buffs have a maximum duration (usually 5 hours)</li>
+	<li>When saving a file for the older versions of the game, content added in newer versions will not work (because it wasn't there yet).</li>
+</ul><p>
+	However, here's a small list of things that <i>do</i> work while they shouldn't:
+</p><ul>
+	<li>There is no minimum limit what maximum health can be.
+	<br>You can even set it to be 0 and watch the character die in one hit from anything.</li>
+	<li>Armor items can have accessory prefixes.</li>
+	<li>Armor can be equipped in wrong slots (e.g. 3 helmets). Set bonuses will not be granted.</li>
+	<li>Armor items can be equipped in accessory slots (and vice versa).</li>
+	<li>Bullets can have some of the prefixes.</li>
+	<li>You can equip two pets or two "light pets" instead of one of both kind.
+	<br>Certain combinations (e.g. Shadow Orb + Fairy Bell) will cause the game to glitchfully re-summon the pet 60 times per second.</li>
+</ul>
+</article>
+
+<article id="use-character">
+<h1><a href="#use-character">
+	Editing the character
+</h1></a><p>
+	General character-related information can be edited via the "Character" tab.<br>
+	Contents and their functions are as following:
+</p>
+<h2>
+	Format
+</h2><p>
+	File format version. If you want to migrate the character to an earlier version of the game, this can be used. Version options are grouped by functionality introduced - you only need to set this to a version earlier or equal to the game version used.
+</p>
+<h2>
+	Health
+</h2><p>
+	Current and maximum health. Click the according number and input the new value.
+</p>
+<h2>
+	Mana
+</h2><p>
+	Current and maximum mana. Click the according number and input the new value.
+</p>
+<h2>
+	Mode
+</h2><p>
+	Mode\difficulty. Setting a character to Hardcore mode requires confirmation to avoid accidents. "Expert mode" is set for worlds rather than for characters.
+</p>
+<h2>
+	Hair style
+</h2><p>
+	Determines the looks of the character's haircut. You can enter an index manually or use arrow-buttons to switch through over the hundred of ones available.
+</p>
+<h2>
+	Gender
+</h2><p>
+	Determines the character's gender. Gender in Terraria only affects the character's appearance and "hurt" sound effects.
+</p>
+<h2>
+	Cloth style
+</h2><p>
+	Controls the appearance of character's default clothes. Terrasavr currently does not display these separately, meaning that you may have to experiment with the options to see how each one looks.
+</p>
+<h2>
+	Colors
+</h2><p>
+	The set of options determines the colors of character's features and default clothes. Colors are entered in hexadecimal format. You can find applications to aid you with picking a color visually by searching "hexadecimal color picker online" or so. A in-program color picker is planned for a later update.
+</p>
+<h2>
+	Fishing quests complete
+</h2><p>
+	The number of quests completed for the Angler. Higher number means better rewards for the new quests, but only up until 150. Due to a code error, rewards for quests 151+ will have similar odds to those on quest 1. The issue persists since the introduction of fishing quests and is not fixed as of 1.3.0.7.
+</p>
+<h2>
+	Extra accessory
+</h2><p>
+	Whether the extra accessory slot for "expert mode" worlds have been unlocked. Has no effect in non-expert-mode worlds.
+</p>
+</article>
+
+<article id="use-items">
+<h1><a href="#use-items">
+	Editing items
+</h1></a><p>
+	The character's possessions are shown across multiple tabs, akin to how they are shown in-game.
+</p>
+<h2>
+	Managing items
+</h2><p>
+	Items can be managed in roughly the same way as they can be in Terraria:
+</p><ul>
+	<li>Items can be moved by clicking the source cell, and then clicking the destination cell.</li>
+	<li>Item stacks can be split by right-clicking them (alternatively, shift+clicking).</li>
+	<li>Item stacks can be destroyed by dropping them off into the "library" section on the bottom of each tab.</li>
+</ul>
+<h2>
+	Adding items
+</h2><p>
+	The most common way to add items is through use of "library". To do so, click "Library" on the right, and select a desired item library from the list.<br>
+	Once selected, the section on the bottom of the tab will be filled with library items, and you will be able to move them to your inventory similar to how you would with shops in the actual game (you can also hold the mouse button to pick up more items at once).
+</p>
+<h2>
+	Editing items
+</h2><p>
+	Whenever an item slot is clicked, it becomes selected (indicated via a border around it). The selected item can then be edited via the "Edit" tab on the right side.
+</p><p>
+	There you can change the item ID (if you know the desired one), change the item quantity, or change it's prefix. All of three are done by clicking the according number and inputting the new value.
+</p><p>
+	For convenience, the bottom of the "Edit" tab is filled with prefix categories, with items being clickable to quickly apply one or other prefix to the item.
+</p>
+<h2>
+	Restocking items
+</h2><p>
+	If you need to stack up an item to max capacity, you can do so by middle-clicking it (alternatively, ctrl+clicking). This can be handy for restoring the used up stacks of materials or "preparing" the library tab before filling the inventory tab with item stacks.
+</p>
+<h2>
+	Setting modifiers\prefixes
+</h2><p>
+	To change an item' modifier, you need to:
+</p><ol>
+	<li>Click an item to select it (and click again if you don't want to move it anywhere)</li>
+	<li>Open the "Edit" tab on the right.</li>
+	<li>Pick the desired prefix from the bottom half of the tab.</li>
+</ol><p>
+	Note that <a href="#io-saving-things-missing">different kinds of items can have different prefixes</a>. If the game discards (or changes) the prefix upon loading, chances are that it's an incompatible one.
+</p>
+</article>
+
+<article id="use-buffs">
+<h1><a href="#use-buffs">
+	Editing buffs
+</h1></a><p>
+	This is mostly akin to <a href="#use-items">editing items</a> - you have your "inventory" of active buffs, and then the catalogue on the bottom/right.
+</p>
+<h2>
+	Infinite buffs
+</h2><p>
+	Terraria doesn't do infinite buffs in a conventional way - instead duration of 18000 (5 hours) is used as an indicator.
+</p><p>
+	For buffs that can be non-expiring (e.g. Shadow Orb), this prevents them from ticking down.
+</p><p>
+	For the rest, well, you have to refill them once per 5 hours.<br>
+	A set of buttons on the bottom of the tab allows to easily back up/restore a set of buffs.
+</p>
+</article>
+
+<article id="use-worlds">
+<h1><a href="#use-worlds">
+	Editing spawnpoints
+</h1></a><p>
+	This tab, previously titled "Worlds",
+	allows you to edit your spawnpoints - that is, where you will be when you enter the world
+	or after you die and respawn.
+</p><p>
+	There is very little reason to touch this tab, save for carrying over information to a new
+	character or cleaning up old spawnpoints if you have somehow hit the 200-spawnpoint hard limit
+	(after which you cannot set any more)
+</p>
+</article>
+
+<article id="download">
+<h1><a href="#download">
+	Downloading \ offline use
+</a></h1><p>
+	While Terrasavr is largely an online\browser-based program, in some cases you may want to use the program without a connection to the internet.
+</p><p>
+	If you have tried to save the page as-is, chances are that the local copy did not work correctly (or at all). This is due to a couple of factors:
+</p><ol><li>
+	The default (non-Flash) version requires a specific server configuration to run in.
+</li><lI>
+	Web browsers can be awkwardly bad at saving interactive web pages for local use.
+</li></ol><p>
+	However, that can be helped - if you <a href="//yellowafterlife.itch.io/terrasavr/purchase" target="_blank">download the SWF file</a> used by the <a href="#flash">flash version</a>, you'll be able to open it with a browser even if no internet connection is available.
+</p><p>
+	If you need to download this documentation, that is much easier to do - simply save any of it's pages. It is specifically designed to include all content in a single file, which then displays displays one or other part of itself depending on the input.
+</p>
+</article>
+
+<article id="versions">
+<h1><a href="#versions">
+	Supported game versions/platforms
+</a></h1><p>
+	Terrasavr supports a number of Terraria versions,
+</p><ul><li>
+	<b>PC/Mac/Linux</b>: 1.1+<br/>
+	Terrasavr supports desktop versions of Terraria all the way down to v1.1 (2011).
+</li><li>
+	<b>iOS/Android</b>: 1.3+ (with caveats)<br/>
+	Although the 2019 mobile versions were updated to be in line with PC file format, modifying your save files voids your right to technical support and may get you in trouble if you post them on official forums (<a href="//forums.terraria.org/index.php?threads/official-505games-policy-regarding-console-mobile-hacking.35819/post-1801576">official policy</a>).
+	See the <a href="#mobile">related page</a> for more information.
+</li><li>
+	<b>Consoles</b>: 1.3+ (with even more caveats)<br/>
+	Although Switch, XB1, and PS4 versions of Terraria now use a format slightly resembling that of PC version (which Terrasavr can load), modifying your save files voids your right to technical support and may even lead to an account ban by console vendor (<a href="//forums.terraria.org/index.php?threads/official-505games-policy-regarding-console-mobile-hacking.35819/post-784433">official policy</a>).
+	See the <a href="#console">related page</a> for more information.
+</li></ul><p>
+	As result, Terrasavr is primarily intended as an character editor for desktop versions, and an character viewer for anything else.
+</p>
+</article>
+
+<article id="mobile">
+<h1><a href="#mobile">
+	Using Terrasavr on mobile
+</a></h1><p>
+	Mobile 1.3 update certainly took a massive amount of effort from developers, and brings the game more in line with PC versions, including save file format and surprisingly user-friendly options for save file backup/restoration.
+</p><p>
+	There are some caveats, however:
+</p><ul><li>
+	Editing your save files voids your right to technical support (as per <a href="//forums.terraria.org/index.php?threads/official-505games-policy-regarding-console-mobile-hacking.35819/post-1801576">505 games policy</a>).
+</li><li>
+	Sharing edited files on official forums is prohibited.
+</li><li>
+	Editing your save files may cause the game to be more eager to crash, and you won't have anyone to complain to (as per caveat #1).
+</li></ul><p>
+	With that out of the way, let's review the points of interest
+</p>
+<h2>
+	Finding your save files
+</h2><p>
+	To much of your (and mine) convenience, there are official guides for backing up and restoring save files:
+</p><ul><li>
+	<a target="_blank" href="//forums.terraria.org/index.php?threads/terraria-mobile-1-3-backup-restore-instructions-for-ios.82300/">iOS</a>
+</li><li>
+	<a target="_blank" href="//forums.terraria.org/index.php?threads/terraria-mobile-1-3-backup-restore-instructions-for-android.82168/">Android</a>
+</li></ul>
+<h2>
+	Using Terrasavr
+</h2><p>
+	Although you can transfer your files to a computer, edit them, and transfer them back, you can also use Terrasavr on your mobile device!
+</p><p>
+	So you can open Terrasavr in your mobile browser as usual, pick your save file, tweak what you must, save it back to the device (usually the file will end up in Downloads folder), and move it back to the save directory as per the official guide.
+</p><p>
+	Unless your device has a pretty big screen, it is generally recommended that you use Terrasavr in landscape mode (much like Terraria itself); please excuse some clunkiness - I was not warned in advance that I'd have to make it work on mobile devices.
+</p>
+<h2>
+	Troubleshooting
+</h2><p>
+	
+</p><ul><li>
+	<b>Terrasavr opens, but all text is black boxes (Android)</b><br>
+	This is an unidentified bug with Chromium on some devices.<br>
+	Opening the program in Firefox instead fixes this.
+</li><li>
+	<b>Files save with wrong extension (iOS)</b><br>
+	This is an issue that was only fixed in iOS 13.<br>
+	If updating the OS is not an option, use a file manager to give the file a correct (.plr) extension manually.
+</li></ul>
+</article>
+
+<article id="console">
+<h1><a href="#console">
+	Terrasavr and console versions
+</a></h1><p>
+	As modern console versions of Terraria are starting to update ot PC-like features and save file format, some of their save files become compatible with Terrasavr. There's a whole bunch of caveats, however:
+</p><ul><li>
+	Editing your save files voids your right to technical support (as per <a href="//forums.terraria.org/index.php?threads/official-505games-policy-regarding-console-mobile-hacking.35819/post-784433">505 games policy</a>).
+</li><li>
+	Editing your save files may result in an account ban on XBox/PS (I am unable to find an official policy for Switch, but probably alike)
+</li><li>
+	Sharing edited files on official forums is prohibited.
+</li><li>
+	As with any external modifications, editing your save files may cause the game to be unstable. I don't think your console could catch fire, and Terrasavr does its best to not touch anything except for what you asked to change, but still a thing to keep in mind.
+</li><li>
+	Depending on console, save files may be hard to acquire, even harder to replace, and may have a secondary layer of encryption (e.g. on Switch), making the whole activity somewhat impractical.
+</li></ul><p>
+	For above reasons, I don't think the reward is worth the risk and work involved;
+</p><p>
+	As of writing this (Oct 2019) people have only confirmed Terrasavr to work with Switch save files.
+</p>
+</article>
+
+<article id="flash">
+<h1><a href="#flash">
+	The flash version
+</a></h1><p>
+	<a href="//yal.cc/r/terrasavr/fl" target="_blank">The flash version</a> of the program uses Adobe Flash Player instead of JavaScript for vast majority of it's functions.
+</p><p>
+	While it relies on the aforementioned browser plugin to function, that permits it to work more consistently and remain independent of system and browser settings.
+</p><p>
+	If the regular version is not working correctly for you, the flash version is a good alternative to having to open the program in a different browser.
+</p><p>
+	It can also be <a href="#download">downloaded</a> for offline use.
+</p>
+</article>
+
+<article id="feature-requests">
+<h1><a href="#feature-requests">
+	Feature requests \ roadmap
+</a></h1><p>
+	This page contains a list and status of commonly requested features.
+</p>
+<h2>
+	Set custom stats for items
+</h2><p>
+	<b>Currently not possible</b>: Terraria only stores a bit of information about each item in the file, namely just the item index (which item it is), item quantity (where applicable), and the item' prefix index. So that's a job for the downloadable game mods.
+</p>
+<h2>
+	Preview the character with armor\vanity\dyes
+</h2><p>
+	<b>Planned, but don't hold your breath</b>: while a potentially useful feature, is also a crazy amount of work - not only would I need to efficiently pack all the additional armor and particle imagery, but also precisely replicate the game's algorithms of drawing the various effects and dyes. 
+</p>
+<h2 id="tapi-support">
+	tAPI support
+</h2><p>
+	<b>Implemented</b>: <a href="//yal.cc/r/tapibara">is a separate program</a>.
+</p><p>
+	While item names\icons\descriptions from custom mods will not be displayed, they can be modified as long as you know the item IDs to input.
+</p>
+<h2 id="mod-support">
+	Mod support
+</h2><blockquote>
+	"Are there plans to support mod X?"
+</blockquote><p>
+	<b>Planned</b>: Since the character files only store item indexes (as opposed to actual stats), supporting a given mod currently requires me to make a partially altered version of the program that would recognize those items and file format changes (see above). Needless to say, that is a lot of work.
+</p><p>
+	In future I plan to make the program more adapted for supporting multiple formats and item sets at once. Most likely will be done together with some major UI overhaul if anything.
+</p>
+<h2 id="downloadable-version">
+	Downloadable\executable version
+</h2><p>
+	<b>Planned</b>: While you already can <a href="#download">download Terrasavr for offline use</a>, I would like at some point to make a "proper" downloadable version that would be able to save/load files without displaying file prompts every time.
+</p><p>
+	That is not as easy as it sounds though - web applications function quite differently to the "native" ones, and doing a native application "right" is quite different from doing a web application "right".
+</p><p>
+	Consistently compiling 5 versions of the program (JavaScript, Flash, Windows, Mac, Linux) would likely be a rather time-consuming process as well.
+</p>
+<h2 id="localizations">
+	Localizations
+</h2><blockquote>
+	"Will Terrasavr be available in language X?"
+</blockquote><p>
+	<b>Planned</b>: Currently Terrasavr is only available in English. This is due to a couple of reasons:
+</p><ol>
+	<li>The program was not made with multi-language support in mind and thus includes no mechanisms for displaying multiple possible captions for everything.</li>
+	<li>The font used by the game ("Andy") does not include any non-Latin characters as-is. Picking a different font would disturb the visual consistency with the game.</li>
+	<li>It would only be possible to include item names and descriptions available in the actual game - any other languages would have a mix of localized UI and English item names/descriptions, which is not good.</li>
+</ol><p>
+	I plan to experiment with more compatible approaches to displaying user interface in future, which should potentially both allow to rely on the viewer's system for font features and for translation software to be able to "read" the program's text.
+</p>
+<h2 id="for-other-games">
+	Software for other games
+</h2><blockquote>
+	"Could you make an editor for game X?"
+</blockquote><p>
+	<b>Maybe, but most likely not</b>: Most of the time I'm extremely busy with <a href="//yal.cc/works">work</a> (which is mostly on videogames! Go take a look sometime), life, and supporting a variety of existing projects.
+</p>
+
+</article>
+
+<article id="motivation">
+<h1><a href="#motivation">
+	Intents &amp; motivation
+</a></h1><p>
+	People sometimes ask me why I made Terrasavr, or why I still update it, so
+</p>
+<h3>
+	Ease of use
+</h3><p>
+	Most of the existing tools at the time would have one or other kind of setup requirements - sometimes you'd need a .NET framework version, sometimes Java, sometimes an incredibly specific version of Python.
+</p><p>
+	Then, of course, you had the actual tool UI, which varied from somewhat expected to unconventional.
+</p><p>
+	For these reasons Terrasavr was made web-based (which means that it runs on majority of devices with no additional effort) and mimics the way UI works in Terraria itself.
+</p>
+<h3>
+	Safety
+</h3><p>
+	There is an inherent risk to running software that you downloaded from the internet.
+</p><p>
+	Most of the people making tools are in for a technical challenge, but how many are ready to support these tools for years to come?
+</p><p>
+	You never know when a thing you use quietly changes hands twice and <a target="_blank" href="//arstechnica.com/information-technology/2018/07/stylish-extension-with-2m-downloads-banished-for-tracking-every-site-visit/">ends up in hands of an Israel-based company that is extremely interested in selling your entire browsing history</a>.
+</p><p>
+	So, Terrasavr is a web-based tool.<br>
+	The only things it touches are the files you give it.<br>
+	The only information it collects is the fact of opening it via Google Analytics/Adsense.<br>
+	The save files are processed client-side and are not uploaded anywhere.
+</p><p>
+	I think this is a good setup to strive for.
+</p>
+<h3>
+	Balance
+</h3><p>
+	My by-far biggest gripe with Terraria at the time of starting to work on Terrasavr (late 2013) was the scarcity of some of the essential items - most notably Magic Mirror. You'd only get 1-2 of these per a small world, so, if you wanted to play with 3 players, some of you would have to get around by foot for the entire duration.
+</p><p>
+	Over time this problem was gradually mitigated (first by introducing Recall Potions, then by introducing Magic Mirror variants acquired through other means), but Terrasavr remains valuable for situations where you don't want to have a huge hole in your world's desert just because you wanted some sandstone for construction.
+</p>
+</article>
+
+<article id="loc">
+<h1><a href="#loc">
+	Translating Terrasavr
+</a></h1><p>
+	You can help translate Terrasavr to other languages!
+</p><p>
+	For this you will need a few things:
+</p><ul>
+	<li>
+		A text/code editor, preferably something with JSON syntax highlighting.<br/>
+		<a href="https://code.visualstudio.com/">VS Code</a> is a good option.
+	</li><li>
+		Basic understanding of English <i>or</i> sufficient understanding of Terraria/Terrasavr.
+	</li><li>
+		A bit of patience - there are 350 translatable snippets of text total.<br/>
+		(though many are only 1-2 words long / can be omitted entirely)
+	</li>
+</ul>
+<h3>
+	The process
+</h3><ul>
+	<li>
+		Download the sample localization file by clicking "Save sample" on the languages tab.<br>
+		You can also download the entire
+		<a href="http://yal.cc/r/terrasavr/temp/lang/lang.zip">language package</a>
+		if you want to look at the existing translations as reference.
+	</li><li>
+		Translate right-hand values ("B" in any "A": "B" pair) of interest.
+	</li><li>
+		Use "Load/preview" button on the languages tab to see if it's working correctly.<br>
+		(e.g. that your labels fit in the UI)
+	</li><li>
+		Once you are done, send your translation file
+		<a href="https://yal.cc/about/">one or other way</a>.
+	</li>
+</ul>
+<h3>
+	Additional notes
+</h3><ul>
+	<li>
+		"itemLocale" in "misc" section indicates which item names/descriptions to use.<br>
+		These are pulled directly from the base game.<br>
+		The following are available:
+		<ul><li>
+			"en-US": English.<br>
+			You can also use "", which will use the Terrasavr's default
+			data set, which can be slightly more precise.
+		</li><li>"de-DE": German
+		</li><li>"es-ES": Spanish
+		</li><li>"fr-FR": French
+		</li><li>"it-IT": Italian
+		</li><li>"pl-PL": Polish
+		</li><li>"pt-BR": Brazilian Portuguese
+		</li><li>"ru-RU": Russian
+		</li><li>"zh-Hans": Simplified Chinese
+		</li></ul>
+		Note that the base game translations can be slightly inaccurate/incomplete,
+		though that is slightly less of a problem for Terrasavr to address.
+	</li><li>
+		"useBitmapFont" in "misc" section can be set to <b>false</b>
+		to always use user's system fonts instead of the stylized font that Terrasavr and Terraria use by default.
+		It's an option to enable if some/all characters of your language are rendered as "?" in Terrasavr.
+	</li><li>
+		Pretty much every label/button/field can also have a tooltip
+		(e.g. <b>saveEquips</b> and <b>saveEquips.ttip</b>)
+		- if you have to shorten words anywhere, you can add tooltips/explanations to items
+		that didn't have them in the English translation.
+	</li>
+</ul>
+</article>
+
+<article id="contact">
+<h1><a href="#contact">
+	Contact
+</a></h1><p>
+	If needed, you can contact me via the following means:
+</p><ul>
+	<li>Twitter: <a href="//twitter.com/YellowAfterlife">@YellowAfterlife</a></li>
+	<li>Tumblr: <a href="//yellowafterlife.tumblr.com/">YellowAfterlife</a></li>
+	<li>VK (for Russian-speaking users): <a href="//vk.com/yellowafterlife">YellowAfterlife</a></li>
+	<li>Email: <a href="mailto://yellowafterlife@hotmail.com">yellowafterlife@hotmail.com</a></li>
+</ul><p>
+	You can also ask questions in the <a href="forums.terraria.org/index.php?threads/404/">program's topic</a> on the official Terraria forums.
+</p>
+</article>
+
+<footer><hr/>
+	Terrasavr &copy; <a href="//yal.cc/">YellowAfterlife</a>. Terraria content/materials are trademarks/copyrights of Re-Logic and its licensors.
+</footer>
+</td><td id="side" width="160">
+	<ins class="adsbygoogle" id="anadbygoogle"
+		 style="display:inline-block;width:160px;height:600px"
+		 data-ad-client="ca-pub-4047006589955023"
+		 data-ad-slot="2079424596"></ins>
+	<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</td>
+</table>
+<script type="text/javascript">
+function find(s) { return document.getElementById(s) }
+function parseArguments(s) {
+	var arr = s.split("&");
+	var r = { };
+	for (var i = 0; i < arr.length; i++) {
+		var pair = arr[i];
+		var pos = pair.indexOf("=");
+		var key, value;
+		if (pos >= 0) {
+			key = pair.substring(0, pos);
+			value = pair.substring(pos + 1);
+		} else {
+			key = pair;
+			value = "";
+		}
+		r["$" + key] = value;
+	}
+	return r;
+}
+var url = document.location.href;
+(function() {
+	// Find the selected item and display it
+	var pos, query = "";
+	if ((pos = url.indexOf("#")) >= 0) {
+		query = url.substring(pos + 1);
+	} else if ((pos = url.indexOf("?")) >= 0) {
+		query = parseArguments(url.substring(pos + 1))["$q"];
+	}
+	if (!query || !find(query)) query = "default";
+	find("loading").removeAttribute("selected");
+	var current = find(query);
+	var article = current;
+	while (article.tagName != "ARTICLE") {
+		article = article.parentElement;
+		if (article == document.body) {
+			article = find("default");
+			break;
+		}
+	}
+	article.setAttribute("selected", "");
+	//
+	var d = current;
+	var y = d.offsetTop - 10;
+	while (d.offsetParent && (d.offsetParent != document.body)) {
+		d = d.offsetParent;
+		y += d.offsetTop;
+	}
+	setTimeout(function() {
+		window.scrollTo(0, y);
+	}, 100);
+})();
+(function() {
+	// no JS: single-page, "#id" to scroll around the page
+	// JS: multi-page, "?q=id" to switch sub-page
+	// A bit weird, but saving the page saves the whole doc.
+	var links = document.getElementsByTagName("a");
+	for (var i = 0; i < links.length; i++) {
+		var link = links[i];
+		var href = link.getAttribute("href");
+		if (href && href.charAt(0) == "#") {
+			var id = href.substring(1);
+			if (!find(id)) console.log("Can't find " + id);
+			link.setAttribute("href", "?q=" + id);
+		}
+	}
+})();
+function hideAdContainer() {
+	find("side").width = "";
+	find("side").style.height = "0";
+	find("doc").style.maxWidth = "700px";
+	document.body.style.minWidth = "inherit";
+}
+document.addEventListener("load", function() {
+	// hide the sidebar if the ad is definitely not there
+	if (!find("adsense") || !find("anadbygoogle")
+	|| find("anadbygoogle").children.length == 0) hideAdContainer();
+});
+</script>
+<script id="adsense" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" onerror="hideAdContainer()"></script>
+<!-- stats and such -->
+<script type="text/javascript">
+var _gaq = _gaq||[];
+_gaq.push(['_setAccount','UA-36439133-1']);
+_gaq.push(['_trackPageview']);
+</script>
+<script type="text/javascript" async="true" src="https://www.google-analytics.com/ga.js"></script>
+</body>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry</title>
+  <link rel="icon" type="image/svg+xml" href="trtools/img/cache-logo.svg" />
+  <style>
+    html,body{ margin:0; padding:0; height:100%; background:#fff; }
+    iframe{ width:100%; height:100%; border:0; display:block; }
+  </style>
+</head>
+<body>
+  <iframe id="toolFrame" title="tool"></iframe>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "trtoolsTool";
+      var params = new URLSearchParams(location.search);
+      var map = {
+        tilesheet: "index",
+        oggconvert: "oggconvert",
+        armorhelper: "armorhelper",
+        spritetransform: "spritetransform",
+        texturesplitter: "texturesplitter",
+        stats: "stats",
+        settings: "settings",
+        tmodunpacker: "tmodunpacker",
+        terrasavr: "terrasavr"
+      };
+
+      var q = params.get("tool");
+      var tool;
+      try {
+        if (q && map[q]) {
+          tool = q;
+          sessionStorage.setItem(STORAGE_KEY, tool);
+        } else {
+          var stored = sessionStorage.getItem(STORAGE_KEY);
+          tool = stored && map[stored] ? stored : "tilesheet";
+          sessionStorage.setItem(STORAGE_KEY, tool);
+        }
+      } catch (_) {
+        tool = (q && map[q]) ? q : "tilesheet";
+      }
+
+      var file = map[tool] || map.tilesheet;
+
+      // 如果当前页面在 iframe 中（例如从 /trtools/*.html?embed=1 打开），避免再次嵌套 iframe。
+      // 直接切换当前 iframe 文档到真实工具页（带 embed=1，避免跳转到根路径形成循环）。
+      if (window.top !== window.self) {
+        location.replace("/trtools/" + file + ".html?embed=1");
+        return;
+      }
+
+      var frame = document.getElementById("toolFrame");
+      frame.src = "/trtools/" + file + ".html?embed=1";
+
+      // 让地址栏保持为根路径，不带任何文件路径/查询参数；当前工具由 sessionStorage 记住，刷新仍停留在该工具。
+      try {
+        history.replaceState({}, document.title, "/");
+      } catch (_) {}
+    })();
+  </script>
+</body>
+</html>
+

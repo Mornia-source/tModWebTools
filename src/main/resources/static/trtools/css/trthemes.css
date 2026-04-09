@@ -1,0 +1,46 @@
+/**
+ * 预设主题：仅切换 --twt-* 变量（主色与浅色表面），与 trtools.css 配套。
+ * 由 html[data-trtheme="…"] 控制；未设置或与 emerald 等效时沿用翠绿。
+ */
+html[data-trtheme="emerald"] {
+  --twt-accent: 59, 191, 122;
+  --twt-accent-deep: 34, 160, 95;
+  --twt-surface-a: 214, 245, 226;
+  --twt-surface-b: 236, 253, 241;
+  --twt-surface-c: 240, 253, 244;
+}
+html[data-trtheme="ocean"] {
+  --twt-accent: 37, 99, 235;
+  --twt-accent-deep: 29, 78, 216;
+  --twt-surface-a: 219, 234, 254;
+  --twt-surface-b: 239, 246, 255;
+  --twt-surface-c: 238, 242, 255;
+}
+html[data-trtheme="violet"] {
+  --twt-accent: 139, 92, 246;
+  --twt-accent-deep: 109, 40, 217;
+  --twt-surface-a: 237, 233, 254;
+  --twt-surface-b: 245, 243, 255;
+  --twt-surface-c: 245, 243, 255;
+}
+html[data-trtheme="amber"] {
+  --twt-accent: 245, 158, 11;
+  --twt-accent-deep: 217, 119, 6;
+  --twt-surface-a: 254, 243, 199;
+  --twt-surface-b: 255, 251, 235;
+  --twt-surface-c: 255, 247, 237;
+}
+html[data-trtheme="rose"] {
+  --twt-accent: 244, 63, 94;
+  --twt-accent-deep: 225, 29, 72;
+  --twt-surface-a: 255, 228, 230;
+  --twt-surface-b: 255, 241, 242;
+  --twt-surface-c: 255, 244, 246;
+}
+html[data-trtheme="teal"] {
+  --twt-accent: 13, 148, 136;
+  --twt-accent-deep: 15, 118, 110;
+  --twt-surface-a: 204, 251, 241;
+  --twt-surface-b: 240, 253, 250;
+  --twt-surface-c: 236, 253, 245;
+}
