@@ -29,6 +29,7 @@ const refs = {
   toTop: el("toTop"),
   tile: el("tile"),
   gap: el("gap"),
+  marginTiles: el("marginTiles"),
   cropTransparent: el("cropTransparent"),
   padRightTiles: el("padRightTiles"),
   padBottomTiles: el("padBottomTiles"),
@@ -36,15 +37,25 @@ const refs = {
   outName: el("outName"),
   cols: el("cols"),
   rows: el("rows"),
+  mergeMultiFrames: el("mergeMultiFrames"),
+  strideIn: el("strideIn"),
   build: el("build"),
   download: el("download"),
   alphaThresholdStitch: el("alphaThresholdStitch"),
   minSeamStitch: el("minSeamStitch"),
   stitch: el("stitch"),
   downloadStitch: el("downloadStitch"),
+  splitMode: el("splitMode"),
+  splitSeamPanel: el("splitSeamPanel"),
+  splitGridPanel: el("splitGridPanel"),
   alphaThresholdSplit: el("alphaThresholdSplit"),
   minSeamSplit: el("minSeamSplit"),
   splitAxis: el("splitAxis"),
+  splitStrideW: el("splitStrideW"),
+  splitStrideH: el("splitStrideH"),
+  splitCropW: el("splitCropW"),
+  splitCropH: el("splitCropH"),
+  splitGridFull: el("splitGridFull"),
   splitCrop: el("splitCrop"),
   splitZip: el("splitZip"),
   split: el("split"),
@@ -87,13 +98,30 @@ function setBusy(v) {
   refs.busy.style.display = v ? "" : "none";
   const ids = [
     "pick","clear","fileInput","build","stitch","split","compose",
-    "tile","gap","cropTransparent","padRightTiles","padBottomTiles","padMode",
+    "tile","gap","marginTiles","mergeMultiFrames","cropTransparent","padRightTiles","padBottomTiles","padMode",
     "cols","rows","outName","alphaThresholdStitch","minSeamStitch",
-    "alphaThresholdSplit","minSeamSplit","splitAxis","splitCrop","splitZip","composeGap",
+    "splitMode","alphaThresholdSplit","minSeamSplit","splitAxis",
+    "splitStrideW","splitStrideH","splitCropW","splitCropH","splitGridFull",
+    "splitCrop","splitZip","composeGap",
     "gif2sheetGap","gif2sheetRun","downloadGif2sheet",
     "sheet2gifFrameH","sheet2gifGap","sheet2gifCount","sheet2gifDelay","sheet2gifRun",
   ];
   for (const k of ids) if (refs[k]) refs[k].disabled = v;
+  syncTilesheetTopLeftDepFields();
+}
+/** 留白：仅「补齐方式 = 左上补齐（物块）」时可编辑并参与生成预览（源图格间距已不在界面配置，切片步长固定为 tile） */
+function padModeIsTopLeft() {
+  return (refs.padMode?.value || "") === "topleft";
+}
+function syncTilesheetTopLeftDepFields() {
+  const busy = refs.busy && refs.busy.style.display !== "none";
+  const allow = !busy && padModeIsTopLeft();
+  try {
+    document.querySelectorAll("[data-twt-topleft-only]").forEach((row) => {
+      row.classList.toggle("twt-row--muted", !allow);
+    });
+  } catch (_) {}
+  if (refs.marginTiles) refs.marginTiles.disabled = !allow;
 }
 function renderPreview() {
   const previewHost = refs.preview && refs.preview.parentElement;
@@ -286,7 +314,8 @@ function addFiles(fileListLike) {
   }
   updateFileList();
   if (state.files.length) {
-    refs.outName.value = `${baseName(state.files[0].name)}_gap1.png`;
+    const g = Math.max(0, parseInt(String(refs.gap?.value ?? "2"), 10));
+    refs.outName.value = `${baseName(state.files[0].name)}_gap${g}.png`;
   }
   resetOutputDownloads();
   renderPreview();
@@ -325,6 +354,35 @@ function addOuterPadding(srcCanvas, rightPx, bottomPx) {
   out.getContext("2d").drawImage(srcCanvas, 0, 0);
   return out;
 }
+/**
+ * 透明留白（单位：px）。应在 buildGapImage 等规则切片完成之后调用，仅扩大画布、不改变格内取样。
+ * 随补齐方式扩边：左上=右下；居中=四边；居中+居下=左右上。
+ */
+function addMarginBleedByPadMode(srcCanvas, bleedPx, padMode) {
+  const n = Math.max(0, Math.floor(bleedPx || 0));
+  if (n <= 0) return srcCanvas;
+  const w = srcCanvas.width;
+  const h = srcCanvas.height;
+  let left = 0;
+  let right = 0;
+  let top = 0;
+  let bottom = 0;
+  if (padMode === "center") {
+    left = right = top = bottom = n;
+  } else if (padMode === "centerBottom") {
+    left = right = top = n;
+    bottom = 0;
+  } else {
+    right = n;
+    bottom = n;
+  }
+  const out = document.createElement("canvas");
+  out.width = w + left + right;
+  out.height = h + top + bottom;
+  const ctx = out.getContext("2d");
+  ctx.drawImage(srcCanvas, left, top);
+  return out;
+}
 function padToMultiple(srcCanvas, tile, mode) {
   const targetW = Math.ceil(srcCanvas.width / tile) * tile;
   const targetH = Math.ceil(srcCanvas.height / tile) * tile;
@@ -335,16 +393,29 @@ function padToMultiple(srcCanvas, tile, mode) {
   out.getContext("2d").drawImage(srcCanvas, dx, dy);
   return out;
 }
-function buildGapImage(srcCanvas, tile, gap) {
-  const tilesX = Math.floor(srcCanvas.width / tile);
-  const tilesY = Math.floor(srcCanvas.height / tile);
+/**
+ * @param {number} strideInPx 源图取样步长（0 或 ≤0 表示与 tile 相同）。前台生成固定传 0；参数保留供将来或脚本复用。
+ */
+function buildGapImage(srcCanvas, tile, gap, strideInPx) {
+  const stride = strideInPx && strideInPx > 0 ? strideInPx : tile;
+  const W = srcCanvas.width;
+  const H = srcCanvas.height;
+  const tilesX = W < tile ? 0 : Math.floor((W - tile) / stride) + 1;
+  const tilesY = H < tile ? 0 : Math.floor((H - tile) / stride) + 1;
   const out = document.createElement("canvas");
+  if (tilesX <= 0 || tilesY <= 0) {
+    out.width = 0;
+    out.height = 0;
+    return out;
+  }
   out.width = tilesX * tile + (tilesX - 1) * gap;
   out.height = tilesY * tile + (tilesY - 1) * gap;
   const ctx = out.getContext("2d");
   for (let y = 0; y < tilesY; y++) for (let x = 0; x < tilesX; x++) {
-    const sx = x * tile, sy = y * tile;
-    const dx = x * (tile + gap), dy = y * (tile + gap);
+    const sx = x * stride;
+    const sy = y * stride;
+    const dx = x * (tile + gap);
+    const dy = y * (tile + gap);
     ctx.drawImage(srcCanvas, sx, sy, tile, tile, dx, dy, tile, tile);
   }
   return out;
@@ -448,36 +519,93 @@ function extractSegmentCanvas(src, axis, seg) {
   }
   return out;
 }
+/** 固定网格切分（Terraria 式：按格距 stride 步进，每格取样 cropW×cropH） */
+function extractGridCells(srcCanvas, strideW, strideH, cropW, cropH) {
+  const W = srcCanvas.width;
+  const H = srcCanvas.height;
+  const outs = [];
+  if (strideW < 1 || strideH < 1 || cropW < 1 || cropH < 1) return outs;
+  for (let y = 0; y + cropH <= H; y += strideH) {
+    for (let x = 0; x + cropW <= W; x += strideW) {
+      const c = document.createElement("canvas");
+      c.width = cropW;
+      c.height = cropH;
+      const g = c.getContext("2d");
+      g.imageSmoothingEnabled = false;
+      g.drawImage(srcCanvas, x, y, cropW, cropH, 0, 0, cropW, cropH);
+      outs.push(c);
+    }
+  }
+  return outs;
+}
 async function buildMain() {
   if (!state.files.length) return showStatus(twtT("tsheet.msgPickFirst"));
   const tile = Math.max(1, parseInt(refs.tile.value || "16", 10));
-  const gap = Math.max(0, parseInt(refs.gap.value || "1", 10));
+  const gap = Math.max(0, parseInt(refs.gap.value || "2", 10));
+  const padMode = refs.padMode.value || "topleft";
+  const marginBleedActive = padMode === "topleft";
+  const marginPxRaw = Math.max(0, parseInt(refs.marginTiles?.value || "2", 10));
+  /** 切片铺排：不再使用界面上的源图格间距，固定按 tile 步进（与 buildGapImage(..., 0) 一致） */
+  const gapImageStrideInPx = 0;
   const crop = !!refs.cropTransparent.checked;
   const padRightPx = Math.max(0, parseInt(refs.padRightTiles.value || "0", 10)) * tile;
   const padBottomPx = Math.max(0, parseInt(refs.padBottomTiles.value || "0", 10)) * tile;
-  const padMode = refs.padMode.value || "topleft";
   const centered = padMode !== "topleft";
+  const mergeMulti = refs.mergeMultiFrames ? refs.mergeMultiFrames.checked : true;
+  const marginPxVal = marginBleedActive ? marginPxRaw : 0;
   setBusy(true);
   try {
     const outFrames = [];
+    const perPrepared = [];
     for (const f of state.files) {
       let c = canvasFromBitmap(await createImageBitmap(f));
       if (crop) c = cropTransparentBorder(c);
       c = addOuterPadding(c, padRightPx, padBottomPx);
-      c = padToMultiple(c, tile, padMode);
-      c = buildGapImage(c, tile, gap);
-      outFrames.push(c);
+      perPrepared.push(c);
+    }
+    if (state.files.length > 1 && mergeMulti) {
+      let maxW = 0;
+      for (const c of perPrepared) maxW = Math.max(maxW, c.width);
+      const padded = perPrepared.map((c) => padCanvasToWidth(c, maxW, centered));
+      let merged = stackVertical(padded, 0);
+      merged = padToMultiple(merged, tile, padMode);
+      merged = buildGapImage(merged, tile, gap, gapImageStrideInPx);
+      outFrames.push(merged);
+    } else {
+      for (const c of perPrepared) {
+        let pc = padToMultiple(c, tile, padMode);
+        pc = buildGapImage(pc, tile, gap, gapImageStrideInPx);
+        outFrames.push(pc);
+      }
+    }
+    if (marginPxVal > 0) {
+      for (let i = 0; i < outFrames.length; i++) {
+        outFrames[i] = addMarginBleedByPadMode(outFrames[i], marginPxVal, padMode);
+      }
+    }
+    const batchSeparate = state.files.length > 1 && !mergeMulti;
+    if (batchSeparate) {
+      for (let i = 0; i < outFrames.length; i++) {
+        const name = `${baseName(state.files[i].name)}_tilesheet.png`;
+        await downloadCanvas(outFrames[i], name);
+      }
     }
     let maxW = 0; for (const f of outFrames) maxW = Math.max(maxW, f.width);
     for (let i = 0; i < outFrames.length; i++) outFrames[i] = padCanvasToWidth(outFrames[i], maxW, centered);
     state.lastOutCanvas = stackVertical(outFrames, 0);
-    refs.download.disabled = false;
+    refs.download.disabled = batchSeparate;
     renderPreview();
     const fh = outFrames[0]?.height || 0;
-    showStatus([
+    const statusLines = [
       twtT("tsheet.msgDone", { w: state.lastOutCanvas.width, h: state.lastOutCanvas.height }),
       twtT("tsheet.msgAfSuggest", { n: fh }),
-    ]);
+    ];
+    if (state.files.length > 1 && mergeMulti) {
+      statusLines.push(twtT("tsheet.msgBuildMerged", { n: state.files.length }));
+    } else if (batchSeparate) {
+      statusLines.push(twtT("tsheet.msgBuildBatchDl", { n: state.files.length }));
+    }
+    showStatus(statusLines);
     showKV({
       [twtT("tsheet.kvInputFrames")]: String(state.files.length),
       [twtT("tsheet.kvTile")]: String(tile),
@@ -509,20 +637,40 @@ async function runSplit() {
   setBusy(true);
   try {
     const src = await ensureSingleInput(); if (!src) return;
-    const axis = refs.splitAxis.value === "y" ? "y" : "x";
-    const alpha = clamp(parseInt(refs.alphaThresholdSplit.value || "0", 10), 0, 255);
-    const min = Math.max(1, parseInt(refs.minSeamSplit.value || "1", 10));
-    const seg = findSegmentsByTransparentSeams(src, axis, alpha, min);
-    if (!seg.length) return showStatus(twtT("tsheet.msgNoSeg"));
     const base = baseName(state.files[0].name);
     const zipMode = !!refs.splitZip.checked;
     const zip = zipMode ? new JSZip() : null;
     const outs = [];
-    for (let i = 0; i < seg.length; i++) {
-      let c = extractSegmentCanvas(src, axis, seg[i]);
-      if (refs.splitCrop.checked) c = cropTransparentBorder(c);
-      outs.push(c);
-      if (zipMode) zip.file(`${base}_${String(i + 1).padStart(3, "0")}.png`, await canvasToBlob(c));
+    const mode = refs.splitMode?.value || "seam";
+    if (mode === "grid") {
+      let strideW = Math.max(1, parseInt(refs.splitStrideW?.value || "18", 10));
+      let strideH = Math.max(1, parseInt(refs.splitStrideH?.value || "18", 10));
+      let cropW = Math.max(1, parseInt(refs.splitCropW?.value || "16", 10));
+      let cropH = Math.max(1, parseInt(refs.splitCropH?.value || "16", 10));
+      if (refs.splitGridFull?.checked) {
+        cropW = strideW;
+        cropH = strideH;
+      }
+      const raw = extractGridCells(src, strideW, strideH, cropW, cropH);
+      if (!raw.length) return showStatus(twtT("tsheet.msgGridNoCells"));
+      for (let i = 0; i < raw.length; i++) {
+        let c = raw[i];
+        if (refs.splitCrop.checked) c = cropTransparentBorder(c);
+        outs.push(c);
+        if (zipMode) zip.file(`${base}_${String(i + 1).padStart(3, "0")}.png`, await canvasToBlob(c));
+      }
+    } else {
+      const axis = refs.splitAxis.value === "y" ? "y" : "x";
+      const alpha = clamp(parseInt(refs.alphaThresholdSplit.value || "0", 10), 0, 255);
+      const min = Math.max(1, parseInt(refs.minSeamSplit.value || "1", 10));
+      const seg = findSegmentsByTransparentSeams(src, axis, alpha, min);
+      if (!seg.length) return showStatus(twtT("tsheet.msgNoSeg"));
+      for (let i = 0; i < seg.length; i++) {
+        let c = extractSegmentCanvas(src, axis, seg[i]);
+        if (refs.splitCrop.checked) c = cropTransparentBorder(c);
+        outs.push(c);
+        if (zipMode) zip.file(`${base}_${String(i + 1).padStart(3, "0")}.png`, await canvasToBlob(c));
+      }
     }
     state.lastOutCanvas = outs[0];
     renderPreview();
@@ -544,6 +692,10 @@ async function runSplit() {
 }
 async function runCompose() {
   if (!state.files.length) return showStatus(twtT("tsheet.msgPickFirst"));
+  const mergeMulti = refs.mergeMultiFrames ? refs.mergeMultiFrames.checked : true;
+  if (state.files.length > 1 && !mergeMulti) {
+    return showStatus(twtT("tsheet.msgComposeNeedMerge"));
+  }
   setBusy(true);
   try {
     const frames = [];
@@ -827,6 +979,22 @@ function initTabs() {
   tabs.forEach((t) => t.addEventListener("click", () => setMode(t.dataset.mode)));
   setMode("build");
 }
+function syncSplitModePanels() {
+  const m = refs.splitMode?.value || "seam";
+  const seam = m === "seam";
+  if (refs.splitSeamPanel) refs.splitSeamPanel.style.display = seam ? "" : "none";
+  if (refs.splitGridPanel) refs.splitGridPanel.style.display = seam ? "none" : "";
+}
+function bindSplitGridFullSync() {
+  const apply = () => {
+    if (!refs.splitGridFull?.checked) return;
+    if (refs.splitStrideW && refs.splitCropW) refs.splitCropW.value = refs.splitStrideW.value;
+    if (refs.splitStrideH && refs.splitCropH) refs.splitCropH.value = refs.splitStrideH.value;
+  };
+  refs.splitGridFull?.addEventListener("change", apply);
+  refs.splitStrideW?.addEventListener("input", () => { if (refs.splitGridFull?.checked) apply(); });
+  refs.splitStrideH?.addEventListener("input", () => { if (refs.splitGridFull?.checked) apply(); });
+}
 function initOnlineCount() {
   try {
     if (!refs.onlineCount) return;
@@ -898,8 +1066,12 @@ refs.drop.addEventListener("drop", (e) => {
   addFiles(e.dataTransfer.files);
 });
 refs.build.addEventListener("click", buildMain);
+refs.padMode?.addEventListener("change", syncTilesheetTopLeftDepFields);
 refs.stitch.addEventListener("click", runStitch);
 refs.split.addEventListener("click", runSplit);
+refs.splitMode?.addEventListener("change", syncSplitModePanels);
+bindSplitGridFullSync();
+syncSplitModePanels();
 refs.compose.addEventListener("click", runCompose);
 if (refs.gif2sheetRun) refs.gif2sheetRun.addEventListener("click", runGif2Sheet);
 if (refs.sheet2gifRun) refs.sheet2gifRun.addEventListener("click", runSheet2Gif);
@@ -931,8 +1103,12 @@ if (typeof ResizeObserver !== "undefined" && previewScrollHost) {
 window.addEventListener("scroll", () => refs.toTop.style.display = window.scrollY > 500 ? "flex" : "none", { passive: true });
 refs.toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 initTabs();
-window.addEventListener("twt:i18n-applied", applyModeChrome);
+window.addEventListener("twt:i18n-applied", () => {
+  applyModeChrome();
+  syncTilesheetTopLeftDepFields();
+});
 initOnlineCount();
+syncTilesheetTopLeftDepFields();
 renderPreview();
 requestAnimationFrame(() => {
   if (!state.lastOutCanvas) renderPreview();

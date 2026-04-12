@@ -30,10 +30,10 @@
     })();
   </script>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
-  <link rel="preload" href="/trtools/css/trtools.css?v=16" as="style" />
+  <link rel="preload" href="/trtools/css/trtools.css?v=20" as="style" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></noscript>
-  <link rel="stylesheet" href="/trtools/css/trtools.css?v=16" />
+  <link rel="stylesheet" href="/trtools/css/trtools.css?v=20" />
   <link rel="stylesheet" href="/trtools/css/trthemes.css?v=1" />
   <link rel="icon" type="image/svg+xml" href="img/cache-logo.svg" />
 </head>
@@ -95,7 +95,7 @@
               <button class="tab" type="button" data-mode="split" data-i18n="tsheet.tabSplit">精灵分解�</button>
             </div>
           </div>
-    <section class="card left">
+    <section class="card left tilesheetParamCard">
       <div class="sectionTitle" data-i18n="tsheet.input">输入</div>
       <div class="drop" id="drop">
         <div style="font-weight:800" data-i18n="tsheet.dropMain">拖拽图片到这�</div>
@@ -106,6 +106,12 @@
           <button class="btn secondary" id="clear" type="button"><i class="fas fa-trash" style="margin-right:8px"></i><span data-i18n="tsheet.clear">清空</span></button>
         </div>
         <ul class="fileList" id="fileList" style="display:none"></ul>
+        <div class="row" style="margin-top:10px;align-items:flex-start">
+          <label class="small inline" style="display:flex;align-items:flex-start;gap:8px;max-width:48rem;line-height:1.45">
+            <input type="checkbox" id="mergeMultiFrames" checked style="margin-top:3px" />
+            <span data-i18n="tsheet.mergeMulti">多图时先纵向合并为一条再处理</span>
+          </label>
+        </div>
       </div>
       <div id="panel-build" class="modePanel active">
         <div class="sectionTitle" data-i18n="tsheet.params">参数</div>
@@ -120,29 +126,46 @@
           <div>
             <label data-i18n="tsheet.lblGap">gap</label>
             <div class="inputPx">
-              <input type="number" id="gap" value="1" min="0" step="1" />
+              <input type="number" id="gap" value="2" min="0" step="1" />
               <span class="pxTag">px</span>
             </div>
           </div>
+          <div class="twtPadDepRow" data-twt-topleft-only>
+            <div class="labelWithHelp">
+              <label data-i18n="tsheet.lblMargin">留白（px）</label>
+              <span class="helpWrap">
+                <button type="button" class="helpIconBtn" data-i18n-aria="tsheet.helpMarginAria">
+                  <i class="fas fa-question-circle" aria-hidden="true"></i>
+                </button>
+                <span class="helpTooltip" data-i18n="tsheet.helpMarginTitle" role="tooltip"></span>
+              </span>
+            </div>
+            <div class="inputPx">
+              <input type="number" id="marginTiles" value="2" min="0" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <!-- 源图格间距已不在界面展示；buildGapImage 仍保留 strideInPx 参数，生成时固定传 0（步长=tile）。 -->
+          <input type="hidden" id="strideIn" value="0" autocomplete="off" />
           <div>
             <label style="display:flex;align-items:center;gap:8px">
               <input type="checkbox" id="cropTransparent" checked />
-              <span data-i18n="tsheet.cropTransparent">裁剪透明外边框（推荐�</span>
+              <span data-i18n="tsheet.cropTransparent">裁剪透明外边框（推荐）</span>
             </label>
             <div class="hint" style="margin-top:6px" data-i18n="tsheet.cropHint">自动裁掉每帧四周全透明边距</div>
           </div>
           <div>
-            <label data-i18n="tsheet.padRight">扩展右侧（tile�</label>
+            <label data-i18n="tsheet.padRight">扩展右侧（tile）</label>
             <input type="number" id="padRightTiles" value="0" min="0" step="1" />
           </div>
           <div>
-            <label data-i18n="tsheet.padBottom">扩展底部（tile�</label>
+            <label data-i18n="tsheet.padBottom">扩展底部（tile）</label>
             <input type="number" id="padBottomTiles" value="0" min="0" step="1" />
           </div>
           <div>
             <label data-i18n="tsheet.padMode">补齐方式</label>
             <select id="padMode">
-              <option value="topleft" data-i18n="tsheet.padTopLeft">左上对齐</option>
+              <option value="topleft" data-i18n="tsheet.padTopLeft">左上补齐（物块）</option>
               <option value="center" data-i18n="tsheet.padCenter">居中补齐</option>
               <option value="centerBottom" selected data-i18n="tsheet.padCenterBottom">水平居中 + 居下</option>
             </select>
@@ -187,15 +210,24 @@
           <button class="btn secondary" id="downloadStitch" type="button" disabled><i class="fas fa-download" style="margin-right:8px"></i><span data-i18n="tsheet.downloadPng">下载 PNG</span></button>
         </div>
       </div>
-      <div id="panel-split" class="modePanel">
-        <div class="sectionTitle" data-i18n="tsheet.splitTitle">精灵分解帧（ZIP�</div>
+            <div id="panel-split" class="modePanel">
+        <div class="sectionTitle" data-i18n="tsheet.splitTitle">精灵分解帧（ZIP）</div>
         <div class="grid" style="margin-top:10px">
           <div>
-            <label data-i18n="tsheet.alphaStitch">空白判定 Alpha 阈�</label>
+            <label data-i18n="tsheet.splitMode">切分方式</label>
+            <select id="splitMode">
+              <option value="seam" selected data-i18n="tsheet.splitModeSeam">按透明缝（原有）</option>
+              <option value="grid" data-i18n="tsheet.splitModeGrid">固定网格（Terraria 物块图）</option>
+            </select>
+          </div>
+        </div>
+        <div id="splitSeamPanel" class="grid" style="margin-top:10px">
+          <div>
+            <label data-i18n="tsheet.alphaStitch">空白判定 Alpha 阈值</label>
             <input type="number" id="alphaThresholdSplit" value="0" min="0" max="255" step="1" />
           </div>
           <div>
-            <label data-i18n="tsheet.minSeam">最小间隙宽�</label>
+            <label data-i18n="tsheet.minSeam">最小间隙宽度</label>
             <div class="inputPx">
               <input type="number" id="minSeamSplit" value="1" min="1" step="1" />
               <span class="pxTag">px</span>
@@ -204,20 +236,59 @@
           <div>
             <label data-i18n="tsheet.splitAxis">切分方向</label>
             <select id="splitAxis">
-              <option value="x" selected data-i18n="tsheet.splitAxisX">横向（按透明竖缝切分�</option>
-              <option value="y" data-i18n="tsheet.splitAxisY">纵向（按透明横缝切分�</option>
+              <option value="x" selected data-i18n="tsheet.splitAxisX">横向（按透明竖缝切分）</option>
+              <option value="y" data-i18n="tsheet.splitAxisY">纵向（按透明横缝切分）</option>
             </select>
+          </div>
+        </div>
+        <div id="splitGridPanel" class="grid" style="margin-top:10px;display:none">
+          <div>
+            <label data-i18n="tsheet.splitStrideW">格间距 宽（px）</label>
+            <div class="inputPx">
+              <input type="number" id="splitStrideW" value="18" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.splitStrideH">格间距 高（px）</label>
+            <div class="inputPx">
+              <input type="number" id="splitStrideH" value="18" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.splitCropW">取样宽（px）</label>
+            <div class="inputPx">
+              <input type="number" id="splitCropW" value="16" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
+          </div>
+          <div>
+            <label data-i18n="tsheet.splitCropH">取样高（px）</label>
+            <div class="inputPx">
+              <input type="number" id="splitCropH" value="16" min="1" step="1" />
+              <span class="pxTag">px</span>
+            </div>
           </div>
           <div>
             <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="splitGridFull" />
+              <span data-i18n="tsheet.splitGridFull">输出整格（取样 = 格间距，一般为 18×18）</span>
+            </label>
+          </div>
+          <div class="hint" style="grid-column:1/-1" data-i18n="tsheet.splitGridHint">从左到右、从上到下按格切出；适用于原版式物块贴图（每格右侧与下方各有 1px 间隔带）。</div>
+        </div>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label style="display:flex;align-items:center;gap:8px">
               <input type="checkbox" id="splitCrop" checked />
-              <span data-i18n="tsheet.splitCrop">切分后裁剪透明外边�</span>
+              <span data-i18n="tsheet.splitCrop">切分后裁剪透明外边框</span>
             </label>
           </div>
           <div>
             <label style="display:flex;align-items:center;gap:8px">
               <input type="checkbox" id="splitZip" />
-              <span data-i18n="tsheet.splitZip">打包�?ZIP</span>
+              <span data-i18n="tsheet.splitZip">打包为 ZIP</span>
             </label>
           </div>
         </div>
@@ -225,7 +296,7 @@
           <button class="btn secondary" id="split" type="button"><i class="fas fa-cut" style="margin-right:8px"></i><span data-i18n="tsheet.runSplit">开始切分并下载</span></button>
         </div>
       </div>
-      <div id="panel-compose" class="modePanel">
+<div id="panel-compose" class="modePanel">
         <div class="sectionTitle" data-i18n="tsheet.composeTitle">单帧拼精灵图</div>
         <div class="grid" style="margin-top:10px">
           <div>
@@ -315,11 +386,11 @@
     <i class="fas fa-arrow-up"></i>
   </button>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script defer src="/trtools/js/i18n-es.js?v=3"></script>
-  <script defer src="/trtools/js/i18n.js?v=6"></script>
+  <script defer src="/trtools/js/i18n-es.js?v=8"></script>
+  <script defer src="/trtools/js/i18n.js?v=11"></script>
   <script defer src="/trtools/js/hot-switch.js?v=5"></script>
   <script defer src="/trtools/js/app-shell.js?v=7"></script>
   <script defer src="/trtools/js/visit-track.js?v=1"></script>
-  <script defer src="/trtools/js/trtools.js?v=7"></script>
+  <script defer src="/trtools/js/trtools.js?v=17"></script>
 </body>
 </html>
