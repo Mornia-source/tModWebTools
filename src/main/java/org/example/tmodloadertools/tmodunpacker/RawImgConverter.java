@@ -6,12 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-/**
- * 对齐 C# RawImage.RawToPng：
- * - 跳过 4 字节
- * - width(int32 LE), height(int32 LE)
- * - 像素按 RGBA 顺序读取
- */
+// 对齐 C# RawImage.RawToPng：
+// - 跳过 4 字节
+// - width(int32 LE), height(int32 LE)
+// - 像素按 RGBA 顺序读取
 final class RawImgConverter {
 
     private RawImgConverter() {}

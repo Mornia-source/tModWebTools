@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * 最小实现：兼容 .NET BinaryReader 的 ReadString（7-bit 编码长度 + UTF-8）。
- * 以及 little-endian 的 Int32。
- */
+// 最小实现：兼容 .NET BinaryReader 的 ReadString（7-bit 编码长度 + UTF-8）。
+// 以及 little-endian 的 Int32。
 final class DotNetBinaryReader {
     private final InputStream in;
 

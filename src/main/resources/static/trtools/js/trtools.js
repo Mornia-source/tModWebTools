@@ -66,6 +66,8 @@ const refs = {
   gif2sheetGap: el("gif2sheetGap"),
   gif2sheetRun: el("gif2sheetRun"),
   downloadGif2sheet: el("downloadGif2sheet"),
+  sheet2gifPreset: el("sheet2gifPreset"),
+  sheet2gifMultiMode: el("sheet2gifMultiMode"),
   sheet2gifFrameH: el("sheet2gifFrameH"),
   sheet2gifGap: el("sheet2gifGap"),
   sheet2gifCount: el("sheet2gifCount"),
@@ -104,12 +106,12 @@ function setBusy(v) {
     "splitStrideW","splitStrideH","splitCropW","splitCropH","splitGridFull",
     "splitCrop","splitZip","composeGap",
     "gif2sheetGap","gif2sheetRun","downloadGif2sheet",
-    "sheet2gifFrameH","sheet2gifGap","sheet2gifCount","sheet2gifDelay","sheet2gifRun",
+    "sheet2gifMultiMode","sheet2gifFrameH","sheet2gifGap","sheet2gifCount","sheet2gifDelay","sheet2gifRun",
   ];
   for (const k of ids) if (refs[k]) refs[k].disabled = v;
   syncTilesheetTopLeftDepFields();
 }
-/** 留白：仅「补齐方式 = 左上补齐（物块）」时可编辑并参与生成预览（源图格间距已不在界面配置，切片步长固定为 tile） */
+// 留白：仅「补齐方式 = 左上补齐（物块）」时可编辑并参与生成预览（源图格间距已不在界面配置，切片步长固定为 tile）
 function padModeIsTopLeft() {
   return (refs.padMode?.value || "") === "topleft";
 }
@@ -292,15 +294,17 @@ function addFiles(fileListLike) {
     return;
   }
   if (mode === "sheet2gif") {
-    const p = arr.find((f) => f.type === "image/png" || /\.png$/i.test(f.name));
-    if (!p) {
+    const pngs = arr.filter((f) => f.type === "image/png" || /\.png$/i.test(f.name));
+    if (!pngs.length) {
       showStatus(twtT("tsheet.msgPngStrip"));
       return;
     }
     state.files.forEach((f) => f.__url && URL.revokeObjectURL(f.__url));
     state.files = [];
-    if (!p.__url) Object.defineProperty(p, "__url", { value: URL.createObjectURL(p) });
-    state.files.push(p);
+    for (const p of pngs) {
+      if (!p.__url) Object.defineProperty(p, "__url", { value: URL.createObjectURL(p) });
+      state.files.push(p);
+    }
     updateFileList();
     resetOutputDownloads();
     renderPreview();
@@ -354,10 +358,8 @@ function addOuterPadding(srcCanvas, rightPx, bottomPx) {
   out.getContext("2d").drawImage(srcCanvas, 0, 0);
   return out;
 }
-/**
- * 透明留白（单位：px）。应在 buildGapImage 等规则切片完成之后调用，仅扩大画布、不改变格内取样。
- * 随补齐方式扩边：左上=右下；居中=四边；居中+居下=左右上。
- */
+// 透明留白（单位：px）。应在 buildGapImage 等规则切片完成之后调用，仅扩大画布、不改变格内取样。
+// 随补齐方式扩边：左上=右下；居中=四边；居中+居下=左右上。
 function addMarginBleedByPadMode(srcCanvas, bleedPx, padMode) {
   const n = Math.max(0, Math.floor(bleedPx || 0));
   if (n <= 0) return srcCanvas;
@@ -393,9 +395,7 @@ function padToMultiple(srcCanvas, tile, mode) {
   out.getContext("2d").drawImage(srcCanvas, dx, dy);
   return out;
 }
-/**
- * @param {number} strideInPx 源图取样步长（0 或 ≤0 表示与 tile 相同）。前台生成固定传 0；参数保留供将来或脚本复用。
- */
+// @param {number} strideInPx 源图取样步长（0 或 ≤0 表示与 tile 相同）。前台生成固定传 0；参数保留供将来或脚本复用。
 function buildGapImage(srcCanvas, tile, gap, strideInPx) {
   const stride = strideInPx && strideInPx > 0 ? strideInPx : tile;
   const W = srcCanvas.width;
@@ -519,7 +519,7 @@ function extractSegmentCanvas(src, axis, seg) {
   }
   return out;
 }
-/** 固定网格切分（Terraria 式：按格距 stride 步进，每格取样 cropW×cropH） */
+// 固定网格切分（Terraria 式：按格距 stride 步进，每格取样 cropW×cropH）
 function extractGridCells(srcCanvas, strideW, strideH, cropW, cropH) {
   const W = srcCanvas.width;
   const H = srcCanvas.height;
@@ -545,7 +545,7 @@ async function buildMain() {
   const padMode = refs.padMode.value || "topleft";
   const marginBleedActive = padMode === "topleft";
   const marginPxRaw = Math.max(0, parseInt(refs.marginTiles?.value || "2", 10));
-  /** 切片铺排：不再使用界面上的源图格间距，固定按 tile 步进（与 buildGapImage(..., 0) 一致） */
+  // 切片铺排：不再使用界面上的源图格间距，固定按 tile 步进（与 buildGapImage(..., 0) 一致）
   const gapImageStrideInPx = 0;
   const crop = !!refs.cropTransparent.checked;
   const padRightPx = Math.max(0, parseInt(refs.padRightTiles.value || "0", 10)) * tile;
@@ -712,7 +712,7 @@ async function runCompose() {
   } finally { setBusy(false); }
 }
 
-/** GIF 的 frameCount 在部分文件/浏览器上会误报为 1，改为按 frameIndex 递增解码直到失败，以拿到全部动画帧。 */
+// GIF 的 frameCount 在部分文件/浏览器上会误报为 1，改为按 frameIndex 递增解码直到失败，以拿到全部动画帧。
 function preferAnimatedImageTrack(decoder) {
   const list = decoder.tracks;
   if (!list || list.length <= 1) return;
@@ -730,9 +730,7 @@ function preferAnimatedImageTrack(decoder) {
   } catch (_) {}
 }
 
-/**
- * @returns {Promise<{ canvas: HTMLCanvasElement, delayMs: number }[]>}
- */
+// @returns {Promise<{ canvas: HTMLCanvasElement, delayMs: number }[]>}
 async function decodeGifToFrames(file) {
   if (typeof ImageDecoder === "undefined") {
     throw new Error(twtT("tsheet.errNoImageDecoder"));
@@ -852,10 +850,43 @@ async function runGif2Sheet() {
 async function runSheet2Gif() {
   setBusy(true);
   try {
-    const src = await ensureSingleInput();
-    if (!src) return;
-    if (state.files[0].type !== "image/png" && !/\.png$/i.test(state.files[0].name)) {
+    if (!state.files.length) {
+      showStatus(twtT("tsheet.msgNeedPngStrip"));
+      return;
+    }
+    const pngFiles = state.files.filter((f) => f.type === "image/png" || /\.png$/i.test(f.name));
+    if (!pngFiles.length) {
       return showStatus(twtT("tsheet.msgNeedPngStrip"));
+    }
+    const inputCanvases = [];
+    for (const f of pngFiles) {
+      const bmp = await createImageBitmap(f);
+      inputCanvases.push(canvasFromBitmap(bmp));
+    }
+    const multiMode = refs.sheet2gifMultiMode?.value || "concat";
+    let src;
+    if (inputCanvases.length === 1) {
+      src = inputCanvases[0];
+    } else if (multiMode === "stack") {
+      const w0 = inputCanvases[0].width;
+      const h0 = inputCanvases[0].height;
+      for (let i = 1; i < inputCanvases.length; i++) {
+        if (inputCanvases[i].width !== w0 || inputCanvases[i].height !== h0) {
+          throw new Error(`堆叠模式要求所有图片宽高一致：第1张为 ${w0}×${h0}，第${i + 1}张为 ${inputCanvases[i].width}×${inputCanvases[i].height}`);
+        }
+      }
+      src = document.createElement("canvas");
+      src.width = w0;
+      src.height = h0;
+      const sctx = src.getContext("2d");
+      sctx.imageSmoothingEnabled = false;
+      for (const c of inputCanvases) sctx.drawImage(c, 0, 0);
+    } else {
+      // 拼合模式：允许输入宽高不同，自动按最大宽度居中后纵向拼接
+      let maxW = 0;
+      for (const c of inputCanvases) maxW = Math.max(maxW, c.width);
+      const padded = inputCanvases.map((c) => padCanvasToWidth(c, maxW, true));
+      src = stackVertical(padded, 0);
     }
     const frameH = Math.max(1, parseInt(refs.sheet2gifFrameH.value || "32", 10));
     const gap = Math.max(0, parseInt(refs.sheet2gifGap.value || "2", 10));
@@ -875,18 +906,26 @@ async function runSheet2Gif() {
     const { GIFEncoder, quantize, applyPalette } = mod;
     const gif = GIFEncoder();
 
+    // 重要：必须用“同一个 palette”处理所有帧，否则会出现部分帧偏色/失真（索引与调色板不匹配）。
+    // gifenc 某些版本会直接读取 options.useSqrt；显式传空配置避免 undefined 访问
+    const all = new Uint32Array((W * H * frames.length) | 0);
+    const u32Frames = new Array(frames.length);
     for (let fi = 0; fi < frames.length; fi++) {
       const c = frames[fi];
       const ctx = c.getContext("2d", { willReadFrequently: true });
       const { data } = ctx.getImageData(0, 0, W, H);
       const uint32 = new Uint32Array(data.buffer, data.byteOffset, (W * H) | 0);
-      const palette = quantize(uint32, 256);
-      const index = applyPalette(uint32, palette);
-      if (fi === 0) {
-        gif.writeFrame(index, W, H, { palette, delay: delayMs });
-      } else {
-        gif.writeFrame(index, W, H, { delay: delayMs });
-      }
+      u32Frames[fi] = uint32;
+      all.set(uint32, fi * W * H);
+    }
+    const safeQuantize = function (px, n, opt) {
+      // gifenc 版本差异：部分实现会直接读取 options.useSqrt；确保永远传入对象
+      return quantize(px, n, opt || {});
+    };
+    const palette = safeQuantize(all, 256, {});
+    for (let fi = 0; fi < frames.length; fi++) {
+      const index = applyPalette(u32Frames[fi], palette);
+      gif.writeFrame(index, W, H, { palette, delay: delayMs });
     }
     gif.finish();
     const u8 = gif.bytes();
@@ -894,7 +933,7 @@ async function runSheet2Gif() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${baseName(state.files[0].name)}_sheet.gif`;
+    a.download = `${baseName(pngFiles[0].name)}_sheet.gif`;
     document.body.appendChild(a);
     requestAnimationFrame(() => {
       a.click();
@@ -908,6 +947,7 @@ async function runSheet2Gif() {
     showStatus(
       [
         twtT("tsheet.msgGifBuilt", { n: frameCount, w: W, h: H, d: delayMs }),
+        pngFiles.length > 1 ? `输入图片：${pngFiles.length} 张（${multiMode === "stack" ? "堆叠" : "拼合"}模式）` : "",
         tail > 2 ? twtT("tsheet.msgGifTail", { px: tail }) : "",
       ].filter(Boolean)
     );
@@ -936,10 +976,25 @@ function applyModeChrome() {
     }
   }
   if (refs.fileInput) {
-    refs.fileInput.multiple = m === "gif2sheet" || m === "sheet2gif" ? false : true;
+    refs.fileInput.multiple = m === "gif2sheet" ? false : true;
     if (m === "gif2sheet") refs.fileInput.accept = ".gif,image/gif";
     else if (m === "sheet2gif") refs.fileInput.accept = ".png,image/png";
     else refs.fileInput.accept = "image/*";
+  }
+}
+
+function applySheet2GifPreset() {
+  const preset = refs.sheet2gifPreset?.value || "14";
+  if (preset === "13") {
+    if (refs.sheet2gifFrameH) refs.sheet2gifFrameH.value = "56";
+    if (refs.sheet2gifGap) refs.sheet2gifGap.value = "0";
+    return;
+  }
+  if (refs.sheet2gifFrameH && (!refs.sheet2gifFrameH.value || refs.sheet2gifFrameH.value === "56")) {
+    refs.sheet2gifFrameH.value = "32";
+  }
+  if (refs.sheet2gifGap && (!refs.sheet2gifGap.value || refs.sheet2gifGap.value === "0")) {
+    refs.sheet2gifGap.value = "2";
   }
 }
 
@@ -956,7 +1011,8 @@ function clearStateOnSubtabSwitch() {
 }
 
 function initTabs() {
-  const tabs = Array.from(document.querySelectorAll(".tab"));
+  const tabsRoot = document.getElementById("tabs");
+  const tabs = tabsRoot ? Array.from(tabsRoot.querySelectorAll(".tab")) : [];
   const panels = {
     build: el("panel-build"),
     stitch: el("panel-stitch"),
@@ -995,67 +1051,6 @@ function bindSplitGridFullSync() {
   refs.splitStrideW?.addEventListener("input", () => { if (refs.splitGridFull?.checked) apply(); });
   refs.splitStrideH?.addEventListener("input", () => { if (refs.splitGridFull?.checked) apply(); });
 }
-function initOnlineCount() {
-  try {
-    if (!refs.onlineCount) return;
-    if (!/^https?:$/.test(location.protocol)) return;
-    const sseUrl = new URL("./events", location.href).toString();
-    const countUrl = new URL("./count", location.href).toString();
-
-    const applyCount = (msg) => {
-      if (typeof msg.count === "number") refs.onlineCount.textContent = String(msg.count);
-    };
-
-    (async () => {
-      let ok = false;
-      try {
-        const res = await fetch(countUrl, { cache: "no-store" });
-        if (res.ok) {
-          const msg = await res.json();
-          applyCount(msg);
-          ok = true;
-        }
-      } catch (_) {}
-      if (!ok) {
-        refs.onlineCount.textContent = "-";
-        return;
-      }
-
-      let pollTimer = null;
-      const poll = async () => {
-        try {
-          const res = await fetch(countUrl, { cache: "no-store" });
-          if (!res.ok) return;
-          applyCount(await res.json());
-        } catch (_) {}
-      };
-
-      const startPolling = () => {
-        if (pollTimer) return;
-        pollTimer = setInterval(poll, 8000);
-      };
-
-      try {
-        const es = new EventSource(sseUrl);
-        es.onmessage = (ev) => {
-          try {
-            applyCount(JSON.parse(ev.data || "{}"));
-          } catch (_) {}
-        };
-        es.onerror = () => {
-          try {
-            es.close();
-          } catch (_) {}
-          startPolling();
-        };
-      } catch (_) {
-        startPolling();
-      }
-    })();
-  } catch (_) {
-    refs.onlineCount.textContent = "-";
-  }
-}
 refs.pick.addEventListener("click", () => refs.fileInput.click());
 refs.fileInput.addEventListener("change", () => addFiles(refs.fileInput.files));
 refs.clear.addEventListener("click", () => clearStateOnSubtabSwitch());
@@ -1075,6 +1070,7 @@ syncSplitModePanels();
 refs.compose.addEventListener("click", runCompose);
 if (refs.gif2sheetRun) refs.gif2sheetRun.addEventListener("click", runGif2Sheet);
 if (refs.sheet2gifRun) refs.sheet2gifRun.addEventListener("click", runSheet2Gif);
+refs.sheet2gifPreset?.addEventListener("change", applySheet2GifPreset);
 refs.download.addEventListener("click", async () => {
   if (!state.lastOutCanvas) return showStatus(twtT("tsheet.msgNeedPreview"));
   await downloadCanvas(state.lastOutCanvas, refs.outName.value || "tilesheet.png");
@@ -1103,11 +1099,11 @@ if (typeof ResizeObserver !== "undefined" && previewScrollHost) {
 window.addEventListener("scroll", () => refs.toTop.style.display = window.scrollY > 500 ? "flex" : "none", { passive: true });
 refs.toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 initTabs();
+applySheet2GifPreset();
 window.addEventListener("twt:i18n-applied", () => {
   applyModeChrome();
   syncTilesheetTopLeftDepFields();
 });
-initOnlineCount();
 syncTilesheetTopLeftDepFields();
 renderPreview();
 requestAnimationFrame(() => {

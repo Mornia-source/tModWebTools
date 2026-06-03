@@ -1,0 +1,57 @@
+[
+  {
+    "id": "no_heal",
+    "name": "\u7981\u7597\u6548\u679c",
+    "code": "#region \u7981\u7597\u6548\u679c\r\n// \u7981\u6b62\u81ea\u7136\u56de\u8840\r\npublic override void NaturalLifeRegen(ref float regen) {\r\n\tif ({ActiveFlag}) {\r\n\t\tregen = 0f;\r\n\t}\r\n}\r\npublic override void UpdateLifeRegen() {\r\n\tif (!{ActiveFlag})\r\n\t\treturn;\r\n\r\n\tif (Player.lifeRegen > 0)\r\n\t\tPlayer.lifeRegen = 0;\r\n\r\n\tif (Player.lifeRegenCount > 0)\r\n\t\tPlayer.lifeRegenCount = 0;\r\n}\r\n// \u7981\u6b62\u836f\u6c34\u3001\u98df\u7269\u3001\u6cbb\u7597\u7c7b\u7269\u54c1\u7684\u56de\u8840\r\npublic override void GetHealLife(Item item, bool quickHeal, ref int healValue) {\r\n\tif ({ActiveFlag}) {\r\n\t\thealValue = 0;\r\n\t}\r\n}\r\n\r\n// \u7981\u6b62\u62a4\u58eb\u6cbb\u7597\r\npublic override bool ModifyNurseHeal(NPC nurse, ref int health, ref bool removeDebuffs, ref string chatText) {\r\n\tif ({ActiveFlag}) {\r\n\t\thealth = 0;\r\n\t\tremoveDebuffs = false;\r\n\t\treturn false;\r\n\t}\r\n\r\n\treturn true;\r\n}\r\n#endregion"
+  },
+  {
+    "id": "attack_flat",
+    "name": "\u653b\u51fb\u529b\u63d0\u5347\uff08\u56fa\u5b9a\u6570\u503c\uff09",
+    "methodSignature": "public override void ModifyWeaponDamage(Item item, ref StatModifier damage)",
+    "methodBody": "// \u5bf9\u6240\u6709\u6b66\u5668\u589e\u52a0 \u56fa\u5b9a \u4f24\u5bb3\r\nif ({ActiveFlag}) {\r\n\titem.damage += {Value};\r\n}",
+    "requiresValue": true,
+    "valueLabel": "\u56fa\u5b9a\u4f24\u5bb3",
+    "valueKind": "fixed",
+    "defaultValue": 1
+  },
+  {
+    "id": "attack_percent",
+    "name": "\u653b\u51fb\u529b\u63d0\u5347\uff08\u767e\u5206\u6bd4\uff09",
+    "methodSignature": "public override void ModifyWeaponDamage(Item item, ref StatModifier damage)",
+    "methodBody": "// \u5bf9\u6240\u6709\u6b66\u5668\u589e\u52a0 \u4f24\u5bb3\r\nif ({ActiveFlag}) {\r\n\tif(item.DamageType == DamageClass.Melee) {\r\n\t\tdamage *= 1 + {Value}f;\r\n\t}\r\n}",
+    "requiresValue": true,
+    "valueLabel": "\u4f24\u5bb3\u63d0\u5347\u6bd4\u4f8b",
+    "valueKind": "percent",
+    "defaultValue": 0.1
+  },
+  {
+    "id": "defense_flat",
+    "name": "\u9632\u5fa1\u529b\u63d0\u5347\uff08\u56fa\u5b9a\u6570\u503c\uff09",
+    "methodSignature": "public override void PostUpdateEquips()",
+    "methodBody": "if ({ActiveFlag}) {\r\n\tPlayer.statDefense += {Value};\r\n}",
+    "requiresValue": true,
+    "valueLabel": "\u56fa\u5b9a\u9632\u5fa1",
+    "valueKind": "fixed",
+    "defaultValue": 1
+  },
+  {
+    "id": "defense_percent",
+    "name": "\u9632\u5fa1\u529b\u63d0\u5347\uff08\u767e\u5206\u6bd4\uff09",
+    "methodSignature": "public override void PostUpdateEquips()",
+    "methodBody": "if ({ActiveFlag}) {\r\n\tPlayer.statDefense *= 1 + {Value}f;\r\n}",
+    "requiresValue": true,
+    "valueLabel": "\u9632\u5fa1\u63d0\u5347\u6bd4\u4f8b",
+    "valueKind": "percent",
+    "defaultValue": 0.1
+  },
+  {
+    "id": "attack_speed_flat",
+    "name": "\u653b\u51fb\u901f\u5ea6\u63d0\u5347\uff08\u56fa\u5b9a\u6570\u503c\uff09",
+    "methodSignature": "public override float UseSpeedMultiplier(Item item)",
+    "methodBody": "return (100 + {Value}) / 100f;",
+    "requiresValue": true,
+    "valueLabel": "\u653b\u51fb\u901f\u5ea6",
+    "valueKind": "fixed",
+    "defaultValue": 10
+  }
+]

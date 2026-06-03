@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.tmp_out.txt
+server-*.log
+trtools-visit-stats.csv
+trtools-visit-stats.csv.tmp

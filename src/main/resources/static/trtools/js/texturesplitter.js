@@ -35,7 +35,7 @@
     "11": "/trtools/img/灰烬块.png",
   };
 
-  /** @type {Promise<any>|null} */
+  // @type {Promise<any>|null}
   let blitsPromise = null;
 
   function loadBlits() {
@@ -49,11 +49,9 @@
     return blitsPromise;
   }
 
-  /**
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {CanvasImageSource} src
-   * @param {number[][]} blits [dx,dy,dw,dh,sx,sy,sw,sh]
-   */
+  // @param {CanvasRenderingContext2D} ctx
+  // @param {CanvasImageSource} src
+  // @param {number[][]} blits [dx,dy,dw,dh,sx,sy,sw,sh]
   function applyBlits(ctx, src, blits) {
     for (const b of blits) {
       const [dx, dy, dw, dh, sx, sy, sw, sh] = b;
@@ -61,12 +59,10 @@
     }
   }
 
-  /**
-   * @param {CanvasImageSource} src
-   * @param {number} w
-   * @param {number} h
-   * @param {number[][]} blits
-   */
+  // @param {CanvasImageSource} src
+  // @param {number} w
+  // @param {number} h
+  // @param {number[][]} blits
   function renderWithBlits(src, w, h, blits) {
     const canvas = document.createElement("canvas");
     canvas.width = w;
@@ -79,9 +75,7 @@
     return canvas;
   }
 
-  /**
-   * @param {number} tt 1..11 叠加 FG_tt.png；-1 与 0 不叠加
-   */
+  // @param {number} tt 1..11 叠加 FG_tt.png；-1 与 0 不叠加
   function overlayUrl(tt) {
     return `/trtools/img/texture-splitter-overlays/FG_${tt}.png`;
   }
@@ -111,9 +105,9 @@
   };
 
   let lastBlobUrl = null;
-  /** @type {File|null} */
+  // @type {File|null}
   let currentFile = null;
-  /** @type {"tile"|"wall"|null} */
+  // @type {"tile"|"wall"|null}
   let detectedKind = null;
 
   function setStatus(msg, isError) {
@@ -140,9 +134,7 @@
     revokeLast();
   }
 
-  /**
-   * @param {HTMLCanvasElement} canvas
-   */
+  // @param {HTMLCanvasElement} canvas
   function showPreview(canvas) {
     const c = refs.preview;
     c.width = canvas.width;
@@ -255,7 +247,7 @@
     return null;
   }
 
-  /** 物块衔接模式：仅 74×74 物块时可操作，其余时候灰显 */
+  // 物块衔接模式：仅 74×74 物块时可操作，其余时候灰显
   function setModeUiEnabled(enabled) {
     if (!refs.modeWrap) return;
     refs.modeWrap.classList.toggle("tsModeWrap--disabled", !enabled);
@@ -357,7 +349,7 @@
       refs.modeRichList.appendChild(li);
     }
 
-    /** 用 fixed 对齐到按钮，避免任意祖先 overflow:hidden 裁切下拉（CSS 里 tsRichSelectHost 仍保留为兜底） */
+    // 用 fixed 对齐到按钮，避免任意祖先 overflow:hidden 裁切下拉（CSS 里 tsRichSelectHost 仍保留为兜底）
     function syncModeRichMenuLayout() {
       if (!refs.modeRichMenu || !refs.modeRichBtn || !refs.modeRichList) return;
       if (refs.modeRichMenu.hidden) {
@@ -598,62 +590,6 @@
   initModeRichSelect();
   setModeUiEnabled(false);
 
-  function initOnlineCount() {
-    try {
-      if (!refs.onlineCount) return;
-      if (!/^https?:$/.test(location.protocol)) return;
-      const sseUrl = new URL("./events", location.href).toString();
-      const countUrl = new URL("./count", location.href).toString();
-      const applyCount = (msg) => {
-        if (typeof msg.count === "number") refs.onlineCount.textContent = String(msg.count);
-      };
-      (async () => {
-        let ok = false;
-        try {
-          const res = await fetch(countUrl, { cache: "no-store" });
-          if (res.ok) {
-            applyCount(await res.json());
-            ok = true;
-          }
-        } catch (_) {}
-        if (!ok) {
-          refs.onlineCount.textContent = "-";
-          return;
-        }
-        let pollTimer = null;
-        const poll = async () => {
-          try {
-            const res = await fetch(countUrl, { cache: "no-store" });
-            if (!res.ok) return;
-            applyCount(await res.json());
-          } catch (_) {}
-        };
-        const startPolling = () => {
-          if (pollTimer) return;
-          pollTimer = setInterval(poll, 8000);
-        };
-        try {
-          const es = new EventSource(sseUrl);
-          es.onmessage = (ev) => {
-            try {
-              applyCount(JSON.parse(ev.data || "{}"));
-            } catch (_) {}
-          };
-          es.onerror = () => {
-            try {
-              es.close();
-            } catch (_) {}
-            startPolling();
-          };
-        } catch (_) {
-          startPolling();
-        }
-      })();
-    } catch (_) {
-      if (refs.onlineCount) refs.onlineCount.textContent = "-";
-    }
-  }
-
   function syncTexRichListLabels() {
     if (!refs.modeRichList) return;
     refs.modeRichList.querySelectorAll(".tsRichSelectItem").forEach(function (li) {
@@ -665,7 +601,7 @@
     updateModeRichFromSelect();
   }
 
-  /* 不可在监听里调用 TWT_I18N.apply：apply 会再次派发 twt:i18n-applied，导致无限递归与页面卡死 */
+  // 不可在监听里调用 TWT_I18N.apply：apply 会再次派发 twt:i18n-applied，导致无限递归与页面卡死
   window.addEventListener("twt:i18n-applied", function () {
     syncTexRichListLabels();
     if (currentFile) {
@@ -678,8 +614,6 @@
       }
     }
   });
-
-  initOnlineCount();
 
   if (refs.toTop) {
     window.addEventListener(

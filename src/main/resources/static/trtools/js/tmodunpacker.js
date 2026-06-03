@@ -68,7 +68,7 @@
         await writable.close();
         return;
       } catch (e) {
-        /* user cancel or API failure */
+        // user cancel or API failure
       }
     }
 

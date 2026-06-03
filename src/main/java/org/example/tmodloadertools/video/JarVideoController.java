@@ -28,9 +28,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
 
-/**
- * 扫描可执行 jar 同目录下的视频文件；{@code /video/} 列表选择；{@code /video/stream?name=} 拉流（支持 Range）。
- */
+// 扫描可执行 jar 同目录下的视频文件；{@code /video/} 列表选择；{@code /video/stream?name=} 拉流（支持 Range）。
 @Controller
 public class JarVideoController {
 

@@ -48,11 +48,68 @@ const refs = {
 
 const state = {
   templates: [],
-  lastOutput: null
+  lastOutput: null,
+  pendingDownload: null
 };
 
 function logStatus(lines) {
   refs.armorStatus.textContent = Array.isArray(lines) ? lines.join("\n") : String(lines || "");
+}
+
+async function canvasToPngBlob(canvas) {
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (blob) return blob;
+  // 某些浏览器/边界情况下 toBlob 可能返回 null，降级用 dataURL 转换
+  const dataUrl = canvas.toDataURL("image/png");
+  const res = await fetch(dataUrl);
+  return await res.blob();
+}
+
+function downloadBlob(blob, filename) {
+  const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  // 立即触发一次下载；若被浏览器拦截，将由“二次点击下载”兜底
+  try { a.click(); } catch (_) {}
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+function clearPendingDownload() {
+  if (state.pendingDownload?.url) {
+    try { URL.revokeObjectURL(state.pendingDownload.url); } catch (_) {}
+  }
+  state.pendingDownload = null;
+  if (refs.runArmor) {
+    refs.runArmor.classList.remove("secondary");
+    refs.runArmor.innerHTML = '<i class="fas fa-cogs" style="margin-right:8px"></i><span data-i18n="armor.export">导出</span>';
+  }
+}
+
+function setPendingDownload(blob, filename) {
+  clearPendingDownload();
+  const url = URL.createObjectURL(blob);
+  state.pendingDownload = { blob, filename, url };
+  if (refs.runArmor) {
+    refs.runArmor.classList.add("secondary");
+    refs.runArmor.innerHTML = '<i class="fas fa-download" style="margin-right:8px"></i><span>点击下载</span>';
+  }
+}
+
+function tryDownloadPending() {
+  const p = state.pendingDownload;
+  if (!p) return false;
+  const a = document.createElement("a");
+  a.href = p.url;
+  a.download = p.filename;
+  document.body.appendChild(a);
+  try { a.click(); } catch (_) {}
+  a.remove();
+  // 下载动作触发后清理（保留 URL 一小会儿，避免极端情况下浏览器还没来得及读取）
+  setTimeout(() => clearPendingDownload(), 2000);
+  return true;
 }
 
 function drawPreview(canvas, target) {
@@ -90,6 +147,26 @@ async function fileToCanvas(file) {
   c.height = bmp.height;
   c.getContext("2d").drawImage(bmp, 0, 0);
   return c;
+}
+
+// 模板必须为 128×80；常见误用是导出为 2×（256×160）等整数倍，这里降为 128×80（最近邻）。
+// @returns {{ ok: boolean, canvas: HTMLCanvasElement, scale: number|null, w: number, h: number }}
+function normalizeArmorTemplateCanvas(src) {
+  const w = src.width;
+  const h = src.height;
+  if (w === 128 && h === 80) {
+    return { ok: true, canvas: src, scale: 1, w, h };
+  }
+  const kw = w / 128;
+  const kh = h / 80;
+  if (kw === kh && Number.isInteger(kw) && kw >= 2) {
+    const out = createPixelCanvas(128, 80);
+    const ctx = out.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(src, 0, 0, w, h, 0, 0, 128, 80);
+    return { ok: true, canvas: out, scale: kw, w, h };
+  }
+  return { ok: false, canvas: src, scale: null, w, h };
 }
 
 function createPixelCanvas(w, h) {
@@ -301,69 +378,8 @@ async function previewFirstInputFile() {
   refs.previewOnly.disabled = false;
 }
 
-function initOnlineCount() {
-  try {
-    if (!refs.onlineCount) return;
-    if (!/^https?:$/.test(location.protocol)) return;
-    const sseUrl = new URL("./events", location.href).toString();
-    const countUrl = new URL("./count", location.href).toString();
-
-    const applyCount = (msg) => {
-      if (typeof msg.count === "number") refs.onlineCount.textContent = String(msg.count);
-    };
-
-    (async () => {
-      let ok = false;
-      try {
-        const res = await fetch(countUrl, { cache: "no-store" });
-        if (res.ok) {
-          const msg = await res.json();
-          applyCount(msg);
-          ok = true;
-        }
-      } catch (_) {}
-      if (!ok) {
-        refs.onlineCount.textContent = "-";
-        return;
-      }
-
-      let pollTimer = null;
-      const poll = async () => {
-        try {
-          const res = await fetch(countUrl, { cache: "no-store" });
-          if (!res.ok) return;
-          applyCount(await res.json());
-        } catch (_) {}
-      };
-
-      const startPolling = () => {
-        if (pollTimer) return;
-        pollTimer = setInterval(poll, 8000);
-      };
-
-      try {
-        const es = new EventSource(sseUrl);
-        es.onmessage = (ev) => {
-          try {
-            applyCount(JSON.parse(ev.data || "{}"));
-          } catch (_) {}
-        };
-        es.onerror = () => {
-          try {
-            es.close();
-          } catch (_) {}
-          startPolling();
-        };
-      } catch (_) {
-        startPolling();
-      }
-    })();
-  } catch (_) {
-    refs.onlineCount.textContent = "-";
-  }
-}
-
 async function runExport() {
+  if (tryDownloadPending()) return;
   if (!refs.armorFiles.files.length) return logStatus(twtT("armor.pickTpl"));
 
   state.templates = Array.from(refs.armorFiles.files);
@@ -372,15 +388,29 @@ async function runExport() {
 
   refs.runArmor.disabled = true;
   try {
-    const zip = refs.zipMode.checked ? new JSZip() : null;
+    // 浏览器通常会拦截一次操作中触发的多次自动下载；输出>1时强制 ZIP 一次性下载更稳定
+    const expectedOutputs = state.templates.length * modes.length;
+    const forceZip = expectedOutputs > 1;
+    const needZip = refs.zipMode.checked || forceZip;
+    if (needZip && typeof window.JSZip === "undefined") {
+      logStatus(twtT("armor.noJszip"));
+      return;
+    }
+    const zip = needZip ? new JSZip() : null;
     let firstOutput = null;
     let count = 0;
+    const notes = [];
 
     for (const file of state.templates) {
-      const src = await fileToCanvas(file);
-      if (src.width !== 128 || src.height !== 80) {
-        logStatus(twtT("armor.badSize", { name: file.name }));
+      const raw = await fileToCanvas(file);
+      const norm = normalizeArmorTemplateCanvas(raw);
+      if (!norm.ok) {
+        notes.push(twtT("armor.badSizeDetail", { name: file.name, w: norm.w, h: norm.h }));
         continue;
+      }
+      const src = norm.canvas;
+      if (norm.scale && norm.scale > 1) {
+        notes.push(twtT("armor.scaledNote", { name: file.name, sw: norm.w, sh: norm.h, k: norm.scale }));
       }
 
       drawPreview(src, refs.inputPreview);
@@ -397,26 +427,27 @@ async function runExport() {
           if (zip) {
             zip.file(gifName, gifBlob);
           } else {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(gifBlob);
-            a.download = gifName;
-            a.click();
+            // 单文件导出：先生成，交给二次点击触发下载（避免浏览器拦截）
+            setPendingDownload(gifBlob, gifName);
           }
         } else {
-          const pngBlob = await new Promise((resolve) => out.toBlob(resolve, "image/png"));
+          const pngBlob = await canvasToPngBlob(out);
           const pngName = `${base}_${mode}.png`;
           if (zip) {
             zip.file(pngName, pngBlob);
           } else {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(pngBlob);
-            a.download = pngName;
-            a.click();
+            setPendingDownload(pngBlob, pngName);
           }
         }
 
         count++;
       }
+    }
+
+    if (count === 0) {
+      clearPendingDownload();
+      logStatus([twtT("armor.noOutput"), ...notes].filter(Boolean));
+      return;
     }
 
     if (firstOutput) {
@@ -427,13 +458,18 @@ async function runExport() {
 
     if (zip) {
       const zipBlob = await zip.generateAsync({ type: "blob" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(zipBlob);
-      a.download = "armorhelper_export.zip";
-      a.click();
+      setPendingDownload(zipBlob, "armorhelper_export.zip");
     }
 
-    logStatus(twtT("armor.doneN", { n: count }));
+    const msg = [
+      twtT("armor.doneN", { n: count }),
+      "已生成文件：请再点击一次“点击下载”按钮开始下载。",
+      ...notes
+    ];
+    if (forceZip && !refs.zipMode.checked) {
+      msg.push("提示：检测到输出文件数>1，已自动改为 ZIP 打包（避免浏览器拦截多次下载）。");
+    }
+    logStatus(msg);
   } catch (err) {
     logStatus(twtT("armor.fail", { e: err?.message || err }));
   } finally {
@@ -496,4 +532,3 @@ window.addEventListener("twt:i18n-applied", () => {
 });
 updateFileText();
 resetOutputPreview();
-initOnlineCount();

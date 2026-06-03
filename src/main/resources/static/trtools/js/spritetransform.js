@@ -9,10 +9,8 @@ const OUT_H = 224;
 const SHEET_W = 40;
 const SHEET_H = 1120;
 
-/**
- * 与 TerrariaSpriteTransform.java 中 drawImage 顺序、坐标一致。
- * 每项: [which: 'body'|'arm'|'female', sx, sy, sw, sh, dx, dy, dw, dh]
- */
+// 与 TerrariaSpriteTransform.java 中 drawImage 顺序、坐标一致。
+// 每项: [which: 'body'|'arm'|'female', sx, sy, sw, sh, dx, dy, dw, dh]
 const BLITS = [
   ["body", 12, 14, 22, 20, 12, 14, 22, 20],
   ["body", 12, 90, 16, 16, 12, 34, 16, 16],
@@ -205,64 +203,7 @@ refs.btnDownload.addEventListener("click", async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 1500);
 });
 
-function initOnlineCount() {
-  try {
-    if (!refs.onlineCount) return;
-    if (!/^https?:$/.test(location.protocol)) return;
-    const sseUrl = new URL("./events", location.href).toString();
-    const countUrl = new URL("./count", location.href).toString();
-    const applyCount = (msg) => {
-      if (typeof msg.count === "number") refs.onlineCount.textContent = String(msg.count);
-    };
-    (async () => {
-      let ok = false;
-      try {
-        const res = await fetch(countUrl, { cache: "no-store" });
-        if (res.ok) {
-          applyCount(await res.json());
-          ok = true;
-        }
-      } catch (_) {}
-      if (!ok) {
-        refs.onlineCount.textContent = "-";
-        return;
-      }
-      let pollTimer = null;
-      const poll = async () => {
-        try {
-          const res = await fetch(countUrl, { cache: "no-store" });
-          if (!res.ok) return;
-          applyCount(await res.json());
-        } catch (_) {}
-      };
-      const startPolling = () => {
-        if (pollTimer) return;
-        pollTimer = setInterval(poll, 8000);
-      };
-      try {
-        const es = new EventSource(sseUrl);
-        es.onmessage = (ev) => {
-          try {
-            applyCount(JSON.parse(ev.data || "{}"));
-          } catch (_) {}
-        };
-        es.onerror = () => {
-          try {
-            es.close();
-          } catch (_) {}
-          startPolling();
-        };
-      } catch (_) {
-        startPolling();
-      }
-    })();
-  } catch (_) {
-    refs.onlineCount.textContent = "-";
-  }
-}
-
 refs.useBodyForFemale.dispatchEvent(new Event("change"));
-initOnlineCount();
 
 if (refs.toTop) {
   window.addEventListener(

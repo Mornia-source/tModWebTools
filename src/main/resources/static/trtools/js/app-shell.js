@@ -1,111 +1,136 @@
 (function () {
   "use strict";
 
-  var shell = document.getElementById("appShell");
-  var btn = document.getElementById("sidebarToggle");
-  var btnInSidebar = document.getElementById("sidebarToggleInSidebar");
-  var sidebar = document.getElementById("appSidebar");
-  if (!shell || !sidebar || (!btn && !btnInSidebar)) return;
-
-  var KEY = "trtools.sidebarCollapsed";
-
-  function twtT(k, fb) {
+  function tr(key, fallback) {
     try {
-      if (window.TWT_I18N && typeof window.TWT_I18N.t === "function") return window.TWT_I18N.t(k);
+      if (window.TWT_I18N && typeof window.TWT_I18N.t === "function") {
+        return window.TWT_I18N.t(key);
+      }
     } catch (_) {}
-    return fb;
+    return fallback;
   }
 
-  /** 与 trtools.css 中手机抽屉断点一致；仅在此宽度下启用「点击侧栏外收起」 */
-  function isMobileDrawerLayout() {
-    try {
-      return !!(window.matchMedia && window.matchMedia("(max-width: 720px)").matches);
-    } catch (_) {
-      return false;
-    }
-  }
+  function initSidebarCollapse() {
+    var shell = document.getElementById("appShell");
+    var sidebar = document.getElementById("appSidebar");
+    var btn = document.getElementById("sidebarToggle");
+    var btnInSidebar = document.getElementById("sidebarToggleInSidebar");
+    if (!shell || !sidebar || (!btn && !btnInSidebar)) return;
 
-  var backdrop = null;
+    var KEY = "trtools.sidebarCollapsed";
+    var backdrop = null;
 
-  function apply(collapsed) {
-    shell.classList.toggle("appShell--sidebarCollapsed", collapsed);
-    [btn, btnInSidebar].forEach(function (b) {
-      if (!b) return;
-      b.setAttribute("aria-expanded", collapsed ? "false" : "true");
-      b.setAttribute(
-        "aria-label",
-        collapsed ? twtT("sidebar.expand", "展开侧边栏") : twtT("sidebar.collapse", "收起侧边栏")
-      );
-    });
-
-    // 手机抽屉：用遮罩层接收点击/tap，避免部分移动端/反代环境下 document click 不触发
-    if (isMobileDrawerLayout()) {
+    function isMobile() {
       try {
-        if (!backdrop) {
-          backdrop = document.createElement("div");
-          backdrop.className = "appSidebarBackdrop";
-          backdrop.setAttribute("aria-hidden", "true");
-          document.body.appendChild(backdrop);
-
-          var closeIfOpen = function () {
-            if (!isMobileDrawerLayout()) return;
-            if (shell.classList.contains("appShell--sidebarCollapsed")) return;
-            apply(true);
-          };
-
-          backdrop.addEventListener("click", closeIfOpen);
-          backdrop.addEventListener("touchstart", closeIfOpen, { passive: true });
-        }
-        backdrop.style.display = collapsed ? "none" : "block";
-      } catch (_) {}
-    } else if (backdrop) {
-      backdrop.style.display = "none";
+        return !!(window.matchMedia && window.matchMedia("(max-width: 720px)").matches);
+      } catch (_) {
+        return false;
+      }
     }
-  }
 
-  try {
-    var fromStorage = localStorage.getItem(KEY) === "1";
-    // 手机默认折叠隐藏；平板(>720px)仍按存储状态。
-    apply(isMobileDrawerLayout() ? true : fromStorage);
-  } catch (_) {
-    apply(false);
-  }
+    function persist(collapsed) {
+      try {
+        localStorage.setItem(KEY, collapsed ? "1" : "0");
+      } catch (_) {}
+    }
 
-  function onToggle() {
-    var collapsed = !shell.classList.contains("appShell--sidebarCollapsed");
-    apply(collapsed);
+    function ensureBackdrop() {
+      if (backdrop) return backdrop;
+      backdrop = document.createElement("div");
+      backdrop.className = "appSidebarBackdrop";
+      backdrop.setAttribute("aria-hidden", "true");
+      backdrop.addEventListener("click", function () {
+        apply(true);
+        persist(true);
+      });
+      document.body.appendChild(backdrop);
+      return backdrop;
+    }
+
+    function apply(collapsed) {
+      shell.classList.toggle("appShell--sidebarCollapsed", collapsed);
+      [btn, btnInSidebar].forEach(function (item) {
+        if (!item) return;
+        item.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        item.setAttribute(
+          "aria-label",
+          collapsed ? tr("sidebar.expand", "展开侧边栏") : tr("sidebar.collapse", "收起侧边栏")
+        );
+      });
+
+      if (isMobile()) {
+        ensureBackdrop().style.display = collapsed ? "none" : "block";
+      } else if (backdrop) {
+        backdrop.style.display = "none";
+      }
+    }
+
+    var initialCollapsed = false;
     try {
-      localStorage.setItem(KEY, collapsed ? "1" : "0");
+      initialCollapsed = isMobile() ? true : localStorage.getItem(KEY) === "1";
+    } catch (_) {}
+    apply(initialCollapsed);
+
+    function toggle() {
+      var collapsed = !shell.classList.contains("appShell--sidebarCollapsed");
+      apply(collapsed);
+      persist(collapsed);
+    }
+
+    if (btn) btn.addEventListener("click", toggle);
+    if (btnInSidebar) btnInSidebar.addEventListener("click", toggle);
+
+    document.addEventListener(
+      "pointerdown",
+      function (e) {
+        if (!isMobile()) return;
+        if (shell.classList.contains("appShell--sidebarCollapsed")) return;
+        var target = e.target;
+        if (!target || target.nodeType !== 1) return;
+        if (sidebar.contains(target)) return;
+        if (btn && (btn === target || btn.contains(target))) return;
+        if (btnInSidebar && (btnInSidebar === target || btnInSidebar.contains(target))) return;
+        apply(true);
+        persist(true);
+      },
+      { capture: true }
+    );
+
+    window.addEventListener("resize", function () {
+      if (!isMobile() && backdrop) {
+        backdrop.style.display = "none";
+      }
+    });
+  }
+
+  function applyI18n() {
+    try {
+      if (window.TWT_I18N && typeof window.TWT_I18N.apply === "function") {
+        window.TWT_I18N.apply(document);
+      }
     } catch (_) {}
   }
 
-  /** 移动端（抽屉）状态：点侧栏以外区域收起（不依赖 backdrop 层级，兼容各种触控/反代环境） */
-  function handleOutsidePointerDown(e) {
-    if (!isMobileDrawerLayout()) return;
-    if (shell.classList.contains("appShell--sidebarCollapsed")) return;
-    if (!e) return;
+  var didShellBoot = false;
 
-    var t = e.target;
-    if (t && t.nodeType !== 1) t = t.parentElement;
-    if (!t || t.nodeType !== 1) return;
-
-    if (sidebar.contains(t)) return;
-    if (btn && (btn === t || btn.contains(t))) return;
-    if (btnInSidebar && (btnInSidebar === t || btnInSidebar.contains(t))) return;
-
-    apply(true);
-    try {
-      localStorage.setItem(KEY, "1");
-    } catch (_) {}
+  function boot() {
+    if (didShellBoot) return;
+    didShellBoot = true;
+    initSidebarCollapse();
+    applyI18n();
   }
 
-  if (btn) btn.addEventListener("click", onToggle);
-  if (btnInSidebar) btnInSidebar.addEventListener("click", onToggle);
+  document.addEventListener("twt:sidebar-ready", boot);
 
-  document.addEventListener("pointerdown", handleOutsidePointerDown, { capture: true });
-
-  window.addEventListener("twt:i18n-applied", function () {
-    var collapsed = shell.classList.contains("appShell--sidebarCollapsed");
-    apply(collapsed);
-  });
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      function () {
+        if (document.querySelector(".appNav")) boot();
+      },
+      { once: true }
+    );
+  } else if (document.querySelector(".appNav")) {
+    boot();
+  }
 })();

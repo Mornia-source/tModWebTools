@@ -1,7 +1,7 @@
 import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
 import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
 
-/** file:// 下无法用 ES 模块相对路径，且 Worker 无法跨源；须用 http(s) 访问 */
+// file:// 下无法用 ES 模块相对路径，且 Worker 无法跨源；须用 http(s) 访问
 const OGG_HTTP_ENV = /^https?:$/i.test(location.protocol);
 
 const el = (id) => document.getElementById(id);
@@ -35,12 +35,12 @@ const refs = {
   dlList: el("oggDlList"),
 };
 
-/** @type {string[]} */
+// @type {string[]}
 let dlUrls = [];
 
-/** @type {File[]} */
+// @type {File[]}
 let queue = [];
-/** @type {{ name: string, blob: Blob }[]} */
+// @type {{ name: string, blob: Blob }[]}
 let lastOutputs = [];
 
 let ffmpegInst = null;
@@ -258,62 +258,6 @@ async function zipAll() {
   setStatus(twtT("ogg.zipDone"));
 }
 
-function initOnlineCount() {
-  try {
-    if (!refs.onlineCount) return;
-    if (!/^https?:$/.test(location.protocol)) return;
-    const sseUrl = new URL("./events", location.href).toString();
-    const countUrl = new URL("./count", location.href).toString();
-    const applyCount = (msg) => {
-      if (typeof msg.count === "number") refs.onlineCount.textContent = String(msg.count);
-    };
-    (async () => {
-      let ok = false;
-      try {
-        const res = await fetch(countUrl, { cache: "no-store" });
-        if (res.ok) {
-          applyCount(await res.json());
-          ok = true;
-        }
-      } catch (_) {}
-      if (!ok) {
-        refs.onlineCount.textContent = "-";
-        return;
-      }
-      let pollTimer = null;
-      const poll = async () => {
-        try {
-          const res = await fetch(countUrl, { cache: "no-store" });
-          if (!res.ok) return;
-          applyCount(await res.json());
-        } catch (_) {}
-      };
-      const startPolling = () => {
-        if (pollTimer) return;
-        pollTimer = setInterval(poll, 8000);
-      };
-      try {
-        const es = new EventSource(sseUrl);
-        es.onmessage = (ev) => {
-          try {
-            applyCount(JSON.parse(ev.data || "{}"));
-          } catch (_) {}
-        };
-        es.onerror = () => {
-          try {
-            es.close();
-          } catch (_) {}
-          startPolling();
-        };
-      } catch (_) {
-        startPolling();
-      }
-    })();
-  } catch (_) {
-    refs.onlineCount.textContent = "-";
-  }
-}
-
 refs.pick.addEventListener("click", () => refs.files.click());
 refs.clear.addEventListener("click", () => {
   queue = [];
@@ -374,7 +318,6 @@ function initOggFileProtocolUi() {
 
 refreshList();
 initOggFileProtocolUi();
-initOnlineCount();
 window.addEventListener("twt:i18n-applied", () => {
   refreshList();
   if (lastOutputs.length) renderDownloadLinks();

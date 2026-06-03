@@ -21,6 +21,10 @@
         tilesheet: "index",
         oggconvert: "oggconvert",
         armorhelper: "armorhelper",
+        armorcodegen: "armorcodegen",
+        prtsarmorgen: "prtsarmorgen",
+        tool14to13: "tool14to13",
+        asepriteplugin: "aseprite-plugin",
         spritetransform: "spritetransform",
         texturesplitter: "texturesplitter",
         stats: "stats",
@@ -46,15 +50,15 @@
 
       var file = map[tool] || map.tilesheet;
 
-      // 如果当前页面在 iframe 中（例如从 /trtools/*.html?embed=1 打开），避免再次嵌套 iframe。
+      // 若当前页面在 iframe 中（例如以 /trtools/*.html?embed=1 打开），避免再次嵌套 iframe。
       // 直接切换当前 iframe 文档到真实工具页（带 embed=1，避免跳转到根路径形成循环）。
       if (window.top !== window.self) {
-        location.replace("/trtools/" + file + ".html?embed=1");
+        location.replace("/trtools/html/" + file + ".html?embed=1");
         return;
       }
 
       var frame = document.getElementById("toolFrame");
-      frame.src = "/trtools/" + file + ".html?embed=1";
+      frame.src = "/trtools/html/" + file + ".html?embed=1";
 
       // 让地址栏保持为根路径，不带任何文件路径/查询参数；当前工具由 sessionStorage 记住，刷新仍停留在该工具。
       try {

@@ -46,6 +46,6 @@
   window.addEventListener("twt:i18n-applied", function () {
     syncLangButtons();
     syncThemeSwatches();
-    /* 勿在此调用 I.apply：apply 会再次派发 twt:i18n-applied，造成无限递归 */
+    // 勿在此调用 I.apply：apply 会再次派发 twt:i18n-applied，造成无限递归
   });
 })();

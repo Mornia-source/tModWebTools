@@ -4,8 +4,8 @@
   if (!el) return;
   if (!/^https?:$/.test(location.protocol)) return;
 
-  var sseUrl = new URL("./events", location.href).toString();
-  var countUrl = new URL("./count", location.href).toString();
+  var sseUrl = "/trtools/events";
+  var countUrl = "/trtools/count";
 
   function applyCount(msg) {
     if (typeof msg.count === "number") el.textContent = String(msg.count);

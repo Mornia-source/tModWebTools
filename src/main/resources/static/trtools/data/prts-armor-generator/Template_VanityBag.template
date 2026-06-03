@@ -1,0 +1,19 @@
+using System.Collections.Generic;
+using Terraria.ModLoader;
+
+namespace ArknightsMod.Content.Items.Armor.{class}.{name_en}
+{
+	public class {name_en}Default : ArknightsVanityBag
+	{
+		public override ObtainTypes ObtainType => ObtainTypes.{obtain_type};
+		public override int Rarity => {rarity};
+		protected override List<int> GetItems() {
+			return
+			[
+				ModContent.ItemType<{name_en}Head>(),
+				ModContent.ItemType<{name_en}Body>(),
+				ModContent.ItemType<{name_en}Legs>()
+			];
+		}
+	}
+}

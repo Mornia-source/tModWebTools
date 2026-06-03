@@ -1,10 +1,31 @@
 (function () {
-  /**
-   * 使用整页跳转，不用 fetch + document.write。
-   * 原因：write 注入后仍共用同一 Window，trtools.js / armorhelper.js 顶层的 const el 会重复声明导致整页脚本崩溃；
-   * 且 document.write 会触发外链脚本的 parser-blocking 警告。
-   */
-  let overlay = null;
+  "use strict";
+
+  var STORAGE_KEY = "trtoolsTool";
+  var overlay = null;
+  var FILE_TO_TOOL = {
+    "index.html": "tilesheet",
+    "oggconvert.html": "oggconvert",
+    "armorhelper.html": "armorhelper",
+    "armorcodegen.html": "armorcodegen",
+    "prtsarmorgen.html": "prtsarmorgen",
+    "tool14to13.html": "tool14to13",
+    "aseprite-plugin.html": "asepriteplugin",
+    "spritetransform.html": "spritetransform",
+    "texturesplitter.html": "texturesplitter",
+    "stats.html": "stats",
+    "settings.html": "settings",
+    "tmodunpacker.html": "tmodunpacker",
+    "terrasavr.html": "terrasavr"
+  };
+
+  function currentFile() {
+    return location.pathname.split("/").pop() || "";
+  }
+
+  function currentToolKey() {
+    return FILE_TO_TOOL[currentFile()] || "";
+  }
 
   function isEmbeddedToolContext() {
     try {
@@ -19,38 +40,40 @@
     }
   }
 
-  /** 根页 iframe 内地址栏常被 replace 成 /，仅靠 search 无法判断；必须在 iframe 里始终给侧栏链上 embed，避免走 redirect:/ */
-  function patchToolHtmlHrefForEmbed(a) {
-    const href = a.getAttribute("href") || "";
-    if (!href.endsWith(".html")) return;
+  function redirectTopLevelToolToRoot() {
+    if (isEmbeddedToolContext()) return;
+    var tool = currentToolKey();
+    if (!tool) return;
     try {
-      const u = new URL(href, location.href);
-      if (!/^\/trtools\/[^/]+\.html$/i.test(u.pathname)) return;
-      u.searchParams.set("embed", "1");
-      a.setAttribute("href", u.pathname + u.search);
+      location.replace("/?tool=" + encodeURIComponent(tool));
+    } catch (_) {}
+  }
+
+  function patchToolHrefForEmbed(a) {
+    var href = a.getAttribute("href") || "";
+    if (!href || !href.endsWith(".html")) return;
+    try {
+      var url = new URL(href, location.href);
+      if (url.origin !== location.origin) return;
+      url.searchParams.set("embed", "1");
+      a.setAttribute("href", url.pathname + url.search);
     } catch (_) {}
   }
 
   function patchPageTabHrefsForEmbed() {
     if (!isEmbeddedToolContext()) return;
-    document.querySelectorAll("a.pageTab[href]").forEach(patchToolHtmlHrefForEmbed);
-    document.querySelectorAll("a.appNavLink--stats[href], a.appNavLink--settings[href]").forEach(patchToolHtmlHrefForEmbed);
+    document.querySelectorAll("a.pageTab[href]").forEach(patchToolHrefForEmbed);
+    document.querySelectorAll("a.appNavLink--stats[href], a.appNavLink--settings[href]").forEach(patchToolHrefForEmbed);
   }
 
   function ensureOverlay() {
     if (overlay) return overlay;
     overlay = document.createElement("div");
     overlay.className = "loadingOverlay";
-    var lt =
-      typeof window.TWT_I18N !== "undefined" && window.TWT_I18N.t
-        ? window.TWT_I18N.t("loading.text")
-        : "加载中…";
     overlay.innerHTML =
       '<div class="loadingCard" role="status" aria-live="polite">' +
       '<div class="loadingSpinner" aria-hidden="true"></div>' +
-      '<div class="small" data-i18n="loading.text">' +
-      lt +
-      "</div>" +
+      '<div class="small" data-i18n="loading.text">加载中...</div>' +
       "</div>";
     document.body.appendChild(overlay);
     return overlay;
@@ -61,82 +84,97 @@
   }
 
   function hideLoading() {
-    if (!overlay) return;
-    overlay.classList.remove("show");
+    if (overlay) overlay.classList.remove("show");
   }
 
-  patchPageTabHrefsForEmbed();
-
-  function isPageTabLink(a) {
+  function isSameOriginHtmlLink(a) {
     if (!a) return false;
-    const href = a.getAttribute("href") || "";
+    var href = a.getAttribute("href") || "";
     try {
-      const to = new URL(href, location.href);
-      if (!to.pathname.endsWith(".html")) return false;
-      return to.origin === location.origin;
+      var to = new URL(href, location.href);
+      return to.origin === location.origin && to.pathname.endsWith(".html");
     } catch (_) {
       return false;
     }
   }
 
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest("a.pageTab, a.appNavLink--stats, a.appNavLink--settings");
-    if (!isPageTabLink(a)) return;
-    const to = new URL(a.getAttribute("href"), location.href);
-    if (to.pathname === location.pathname) return;
+  function toolKeyFromPathname(pathname) {
+    var file = (pathname || "").split("/").pop() || "";
+    return FILE_TO_TOOL[file] || "";
+  }
+
+  function persistToolKey(tool) {
+    if (!tool) return;
     try {
-      if (isEmbeddedToolContext()) {
-        to.searchParams.set("embed", "1");
+      sessionStorage.setItem(STORAGE_KEY, tool);
+      if (window.top && window.top !== window.self) {
+        window.top.sessionStorage.setItem(STORAGE_KEY, tool);
       }
     } catch (_) {}
+  }
+
+  function persistActiveTool() {
+    persistToolKey(currentToolKey());
+  }
+
+  redirectTopLevelToolToRoot();
+  persistActiveTool();
+
+  function patchEmbedNavWhenReady() {
+    patchPageTabHrefsForEmbed();
+    persistActiveTool();
+  }
+
+  document.addEventListener("twt:sidebar-ready", patchEmbedNavWhenReady);
+
+  if (document.querySelector(".appNav a.pageTab[href]")) {
+    patchEmbedNavWhenReady();
+  }
+
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a.pageTab, a.appNavLink--stats, a.appNavLink--settings");
+    if (!isSameOriginHtmlLink(a)) return;
+
+    var to = new URL(a.getAttribute("href"), location.href);
+    if (to.pathname === location.pathname && to.search === location.search) return;
+    if (isEmbeddedToolContext()) to.searchParams.set("embed", "1");
+
+    var destTool = toolKeyFromPathname(to.pathname);
+    if (destTool) persistToolKey(destTool);
+
     e.preventDefault();
     showLoading();
     location.assign(to.href);
   });
 
-  function scheduleInitialHide() {
+  if (document.readyState === "loading") {
+    showLoading();
+    window.addEventListener(
+      "DOMContentLoaded",
+      function () {
+        setTimeout(hideLoading, 180);
+      },
+      { once: true }
+    );
+  } else {
+    showLoading();
     setTimeout(hideLoading, 180);
   }
 
-  if (document.readyState === "loading") {
-    showLoading();
-    window.addEventListener("DOMContentLoaded", scheduleInitialHide, { once: true });
-  } else {
-    showLoading();
-    scheduleInitialHide();
-  }
-
-  window.addEventListener("load", () => hideLoading(), { once: true });
-  window.addEventListener("pageshow", () => setTimeout(hideLoading, 0));
+  window.addEventListener("load", hideLoading, { once: true });
+  window.addEventListener("pageshow", function () {
+    setTimeout(hideLoading, 0);
+  });
   setTimeout(hideLoading, 10000);
 
-  window.addEventListener("twt:i18n-applied", () => {
+  window.addEventListener("twt:i18n-applied", function () {
     if (!overlay) return;
-    const el = overlay.querySelector("[data-i18n=\"loading.text\"]");
-    if (el && window.TWT_I18N && window.TWT_I18N.t) el.textContent = window.TWT_I18N.t("loading.text");
-  });
-
-  /** 记录当前工具页，供根路径 / 刷新后仍打开同一选项卡（与 static/index.html 中 sessionStorage 配合） */
-  (function persistActiveTool() {
+    var el = overlay.querySelector('[data-i18n="loading.text"]');
+    if (!el) return;
     try {
-      var path = location.pathname.split("/").pop() || "";
-      var byFile = {
-        "index.html": "tilesheet",
-        "oggconvert.html": "oggconvert",
-        "armorhelper.html": "armorhelper",
-        "spritetransform.html": "spritetransform",
-        "texturesplitter.html": "texturesplitter",
-        "stats.html": "stats",
-        "settings.html": "settings",
-        "tmodunpacker.html": "tmodunpacker",
-        "terrasavr.html": "terrasavr"
-      };
-      for (var file in byFile) {
-        if (Object.prototype.hasOwnProperty.call(byFile, file) && path.endsWith(file)) {
-          sessionStorage.setItem("trtoolsTool", byFile[file]);
-          break;
-        }
+      if (window.TWT_I18N && typeof window.TWT_I18N.t === "function") {
+        el.textContent = window.TWT_I18N.t("loading.text");
       }
     } catch (_) {}
-  })();
+  });
 })();

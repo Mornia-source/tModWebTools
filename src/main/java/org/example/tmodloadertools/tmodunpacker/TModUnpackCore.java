@@ -13,9 +13,7 @@ import java.util.zip.InflaterInputStream;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
-/**
- * Java 版 tModUnpacker：按 C# 源码逻辑解析并导出文件（含旧格式整体 deflate 与新格式分文件 deflate）。
- */
+// Java 版 tModUnpacker：按 C# 源码逻辑解析并导出文件（含旧格式整体 deflate 与新格式分文件 deflate）。
 final class TModUnpackCore {
 
     record FileEntry(String path, int size, int compressedLen, int dataOffset) {}
@@ -146,9 +144,7 @@ final class TModUnpackCore {
         throw last != null ? last : new IOException("deflate 解压失败");
     }
 
-    /**
-     * 简单版本比较：按 '.' 分段整数比较；不足段视为 0。
-     */
+    // 简单版本比较：按 '.' 分段整数比较；不足段视为 0。
     private static int compareVersion(String a, String b) {
         int[] av = parseVersion(a);
         int[] bv = parseVersion(b);
