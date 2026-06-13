@@ -23,6 +23,7 @@
 | OGG 转换 | 批量将音频转为 Terraria 常用 OGG（浏览器端 FFmpeg） |
 | .tMod 文件解包 | 上传 `.tmod`，服务端解包并下载资源 |
 | 角色存档编辑器（Terrasavr） | 内嵌 Terrasavr 页面 |
+| 特效编辑生成器 1.4.4（tFX） | 内嵌独立维护的 tEffectEditor，图形化编辑刀光/拖尾/粒子并导出 C#（见下方「外置编辑器部署」） |
 | Aseprite 插件 | 插件说明与下载入口 |
 
 ### 站点能力
@@ -162,6 +163,16 @@ proxy_set_header X-Forwarded-Proto $scheme;
 
 将视频文件放在与 JAR **同一目录**，访问 `/video/` 即可在页面上选择播放；流地址形如 `/video/stream?name=文件名`。
 
+### 外置编辑器部署（特效编辑生成器 tEffectEditor）
+
+「特效编辑生成器 1.4.4」为**独立维护的纯前端子项目**，**不**打进 JAR，便于与主程序各自单独更新：
+
+1. 将整个 `tEffectEditor/` 目录上传到与可执行 JAR **同级**的位置（如 `/www/wwwroot/trtool/tEffectEditor/`）。
+2. 服务会把 `/effecteditor-app/**` 映射到该目录，主工具页用 iframe 内嵌；侧栏「tFX 特效编辑生成器 1.4.4」即可直接使用。
+3. 探测顺序：`trtools.effecteditor.dir`（绝对路径，开发联调用）→ JAR 同级 `tEffectEditor/` → 上级 `../tEffectEditor/` → 工作目录 `./tEffectEditor/`。
+4. 未上传时 iframe 内显示「未部署」提示页，不影响其它工具。
+5. 更新编辑器：直接替换服务器上的 `tEffectEditor/` 目录即可，**无需重新打包 JAR**。
+
 ---
 
 ## 配置说明
@@ -174,6 +185,7 @@ proxy_set_header X-Forwarded-Proto $scheme;
 | `spring.servlet.multipart.max-file-size` | `.tmod` 上传大小上限 |
 | `trtools.prts.api-url` | PRTS Wiki API 地址 |
 | `trtools.prts.*-timeout-*` / `max-retries` | PRTS 请求超时与重试 |
+| `trtools.effecteditor.dir` | 外置 tEffectEditor 目录绝对路径（留空则自动探测 JAR 同级 `tEffectEditor/`） |
 
 生产环境也可通过外部 `application.properties` 或启动参数覆盖，例如：
 

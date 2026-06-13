@@ -85,12 +85,22 @@ public class TrtoolsRedirectController {
         return redirectRootTool("terrasavr");
     }
 
+    @GetMapping("/effecteditor.html")
+    public ResponseEntity<Void> effectEditorRoot() {
+        return redirectRootTool("effecteditor");
+    }
+
     @Autowired
     private ResourceLoader resourceLoader;
 
     @GetMapping("/trtools/index.html")
     public ResponseEntity<byte[]> trtoolsIndex() {
         return serveTrtoolsHtml("index");
+    }
+
+    @GetMapping("/trtools/effecteditor.html")
+    public ResponseEntity<byte[]> trtoolsEffectEditor() {
+        return serveTrtoolsHtml("effecteditor");
     }
 
     @GetMapping("/trtools/oggconvert.html")

@@ -1,10 +1,20 @@
 <div class="appSidebarInner">
+  <style>
+    /* tFX 文字图标（与 tEffectEditor 左上角 logo 同款样式）——随侧栏注入即生效 */
+    .tabIconTfx {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 16px; height: 16px; font-size: 9px; font-weight: 800; letter-spacing: .5px;
+      color: var(--accent, #2d8ceb); font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1;
+    }
+  </style>
   <div class="appSidebarHeader">
     <div class="appSidebarBrand" data-i18n="brand.short">tModWebTools - TWT</div>
   </div>
   <nav class="appNav" data-i18n-aria="nav.aria" aria-label="工具导航">
     <div class="appNavSectionLabel" data-nav-section="tools" data-i18n="nav.sectionTools">工具</div>
     <a class="appNavLink pageTab" data-twt-page="index" href="./index.html"><img class="tabIcon" src="/trtools/img/Tilesheet.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span class="appNavLabel" data-i18n="nav.tilesheet">切片图工具</span></a>
+    <a class="appNavLink pageTab" data-twt-page="effecteditor" href="./effecteditor.html"><span class="tabIcon tabIconTfx" aria-hidden="true">tFX</span><span class="appNavLabel" data-i18n="nav.effectEditor">特效编辑生成器 1.4.4</span></a>
     <a class="appNavLink pageTab" data-twt-page="armorhelper" href="./armorhelper.html"><img class="tabIcon" src="/trtools/img/ArmorHelper.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span class="appNavLabel" data-i18n="nav.armor">装备帧生成器</span></a>
     <a class="appNavLink pageTab" data-twt-page="prtsarmorgen" href="./prtsarmorgen.html"><img class="tabIcon" src="/trtools/img/prts-wiki-favicon.ico" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span class="appNavLabel" data-i18n="nav.prtsArmor">PRTS 盔甲生成器</span><span class="appNavBadge appNavBadge--new" data-i18n="nav.badgeNew">新</span></a>
     <a class="appNavLink pageTab" data-twt-page="spritetransform" href="./spritetransform.html"><img class="tabIcon" src="/trtools/img/SpriteTransform.png" alt="" width="16" height="16" decoding="async" fetchpriority="low" /><span class="appNavLabel" data-i18n="nav.sprite">躯干格式转换器</span></a>

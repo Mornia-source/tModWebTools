@@ -16,7 +16,8 @@
     "stats.html": "stats",
     "settings.html": "settings",
     "tmodunpacker.html": "tmodunpacker",
-    "terrasavr.html": "terrasavr"
+    "terrasavr.html": "terrasavr",
+    "effecteditor.html": "effecteditor"
   };
 
   function currentFile() {

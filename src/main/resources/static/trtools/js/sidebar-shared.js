@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html?v=7";
+  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html?v=9";
   var SHELL_CSS_URL = "/trtools/css/trtools-shell.css?v=6";
 
   function ensureShellStyles() {
