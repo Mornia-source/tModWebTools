@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-doc="meta.titleXnbCompiler">XNB 编译器 — tModWebTools</title>
+  <script>
+    (function () {
+      try {
+        var lang = localStorage.getItem("trtools.lang") || "zh-CN";
+        var theme = localStorage.getItem("trtools.theme") || "emerald";
+        var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
+        var TBOOT = {
+          "meta.titleXnbCompiler": { zh: "XNB 编译器 — tModWebTools", en: "XNB Compiler — tModWebTools", es: "Compilador XNB — tModWebTools" }
+        };
+        var _tt = document.querySelector("title[data-i18n-doc]");
+        var _key = _tt && _tt.getAttribute("data-i18n-doc");
+        if (_key && TBOOT[_key]) document.title = TBOOT[_key][lt];
+        document.documentElement.setAttribute("lang", lang === "zh-CN" ? "zh-CN" : lang === "es" ? "es" : "en");
+        document.documentElement.setAttribute("data-trtheme", theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preload" href="/trtools/css/trtools.css?v=24" as="style" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></noscript>
+  <link rel="stylesheet" href="/trtools/css/trtools.css?v=24" />
+  <link rel="stylesheet" href="/trtools/css/trthemes.css?v=1" />
+  <link rel="icon" type="image/svg+xml" href="/trtools/img/cache-logo.svg" />
+  <style>
+    .xnb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .xnb-grid { grid-template-columns: 1fr; } }
+    .xnb-fieldset { border: 1px solid var(--border, #e0e0e0); border-radius: 8px; padding: 12px 14px; margin: 0; }
+    .xnb-fieldset legend { font-weight: 700; font-size: 13px; padding: 0 6px; color: var(--accent, #2d8ceb); }
+    .xnb-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .xnb-row label { font-size: 13px; color: var(--text, #222); min-width: 0; }
+    .xnb-row input[type="text"], .xnb-row select { font-size: 13px; padding: 4px 8px; border: 1px solid var(--border, #ccc); border-radius: 5px; background: var(--input-bg, #fff); color: var(--text, #222); flex: 1; min-width: 0; }
+    .xnb-row input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent, #2d8ceb); }
+    .xnb-hint { font-size: 11px; color: var(--muted, #888); margin-top: 2px; }
+    .xnb-dir-row { display: flex; gap: 8px; align-items: center; }
+    .xnb-dir-row input[type="text"] { flex: 1; }
+    .xnb-action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .xnb-preview { font-size: 12px; font-family: "Consolas", "Courier New", monospace; background: var(--code-bg, #f5f5f5); border-radius: 8px; padding: 10px 12px; max-height: 320px; overflow: auto; white-space: pre; border: 1px solid var(--border, #ddd); color: var(--text, #222); }
+    .xnb-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 6px; background: var(--accent, #2d8ceb); color: #fff; vertical-align: middle; }
+  </style>
+</head>
+<body class="appBody" data-twt-active="xnbcompiler">
+  <div class="bgFx" aria-hidden="true"></div>
+  <div class="appShell" id="appShell">
+    <aside class="appSidebar" id="appSidebar">
+      <div id="appSidebarInnerMount"></div>
+    </aside>
+    <main class="appMain">
+      <div class="appMainInner">
+        <div class="appTopBar card panel">
+          <button type="button" class="sidebarToggle" id="sidebarToggle" data-i18n-title="sidebar.collapse" data-i18n-aria="sidebar.collapse" title="收起侧边栏" aria-expanded="true" aria-controls="appSidebar" aria-label="收起侧边栏">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="appTopBarMain">
+            <h1 class="appPageTitle" style="display:flex;align-items:center;gap:10px">
+              <img src="/trtools/img/xnb.ico" alt="" width="22" height="22" style="object-fit:contain" />
+              <span data-i18n="xnb.h1">XNB 编译器配置生成器</span>
+            </h1>
+            <div class="hint" style="margin-top:4px" data-i18n="xnb.intro">图形化配置 EasyXnb 编译选项，生成可直接使用的 App.config 配置文件。</div>
+          </div>
+          <div class="appTopBarEnd">
+            <div class="onlineBlock">
+              <div class="online" data-i18n-title="online.tooltipDefault">
+                <span data-i18n="online.prefix">当前在线</span> <span id="onlineCount">-</span> <span data-i18n="online.suffix">人</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 说明卡片 -->
+        <section class="card panel" style="margin-top:16px">
+          <div class="sectionTitle" data-i18n="xnb.aboutTitle">关于 EasyXnb</div>
+          <p class="hint" style="margin-top:6px;line-height:1.7" data-i18n="xnb.aboutBody">
+            EasyXnb 是一个面向 tModLoader 的 XNB 编译工具，可将着色器（.fx）、贴图（.png/.jpg/.bmp/.tga/.dds）和模型（.fbx）编译为 XNA 内容管线格式（.xnb）。<br/>
+            本页提供图形化界面来生成 <code>App.config</code> 配置文件；下载后放入 EasyXnb 的运行目录即可覆盖默认配置。
+          </p>
+          <div class="xnb-action-row" style="margin-top:10px">
+            <a class="btn secondary" href="https://github.com/nickelc/EasyXnb" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-github" style="margin-right:6px"></i><span data-i18n="xnb.githubLink">EasyXnb GitHub</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- 配置区 -->
+        <section class="card panel" style="margin-top:16px">
+          <div class="sectionTitle" data-i18n="xnb.configTitle">编译配置</div>
+          <div class="xnb-grid" style="margin-top:12px">
+
+            <!-- 目录设置 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendDir">目录</legend>
+              <div style="margin-top:4px">
+                <label style="font-size:13px;font-weight:600" data-i18n="xnb.lblInput">输入目录</label>
+                <div class="xnb-dir-row" style="margin-top:4px">
+                  <input type="text" id="xnbInputDir" value="default" placeholder="default 或绝对路径" />
+                </div>
+                <div class="xnb-hint" data-i18n="xnb.hintInput">填 default 表示使用 EasyXnb.exe 所在目录</div>
+              </div>
+              <div style="margin-top:8px">
+                <label style="font-size:13px;font-weight:600" data-i18n="xnb.lblOutput">输出目录</label>
+                <div class="xnb-dir-row" style="margin-top:4px">
+                  <input type="text" id="xnbOutputDir" value="default" placeholder="default 或绝对路径" />
+                </div>
+                <div class="xnb-hint" data-i18n="xnb.hintOutput">填 default 表示输出到 EasyXnb.exe 所在目录</div>
+              </div>
+              <div style="margin-top:8px">
+                <label style="font-size:13px;font-weight:600" data-i18n="xnb.lblIntermed">中间目录</label>
+                <div class="xnb-dir-row" style="margin-top:4px">
+                  <input type="text" id="xnbIntermedDir" value="default" placeholder="default 或绝对路径" />
+                </div>
+                <div class="xnb-hint" data-i18n="xnb.hintIntermed">中间产物目录，一般保持 default</div>
+              </div>
+            </fieldset>
+
+            <!-- 编译开关 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendCompile">编译开关</legend>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbCompileTextures" checked />
+                <label for="xnbCompileTextures" data-i18n="xnb.lblTextures">编译贴图（.png/.jpg/.bmp/.tga/.dds）</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbIgnorePng" checked />
+                <label for="xnbIgnorePng" data-i18n="xnb.lblIgnorePng">忽略 .png（仅编译其他格式贴图）</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbCompileFonts" />
+                <label for="xnbCompileFonts" data-i18n="xnb.lblFonts">编译字体（.dynamicfont，实验性）</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbCompileMaterials" />
+                <label for="xnbCompileMaterials" data-i18n="xnb.lblMaterials">单独编译材质（模型材质分离）</label>
+              </div>
+            </fieldset>
+
+            <!-- 输出设置 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendOutput">输出设置</legend>
+              <div class="xnb-row">
+                <label style="white-space:nowrap" data-i18n="xnb.lblProfile">目标配置文件</label>
+                <select id="xnbProfile">
+                  <option value="Reach" selected>Reach（推荐，tModLoader 兼容）</option>
+                  <option value="HiDef">HiDef</option>
+                </select>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbCompress" />
+                <label for="xnbCompress" data-i18n="xnb.lblCompress">压缩输出（CompressContent）</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbRebuildAll" checked />
+                <label for="xnbRebuildAll" data-i18n="xnb.lblRebuild">总是重新编译（RebuildAll）</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbEffectBytecode" />
+                <label for="xnbEffectBytecode" data-i18n="xnb.lblBytecode">输出着色器字节码（.fxc）而非 .xnb</label>
+              </div>
+            </fieldset>
+
+            <!-- 行为设置 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendBehavior">运行行为</legend>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbCloseImmediate" />
+                <label for="xnbCloseImmediate" data-i18n="xnb.lblClose">编译完成后立即关闭窗口</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbWaitError" checked />
+                <label for="xnbWaitError" data-i18n="xnb.lblWaitError">出错时等待按键后关闭</label>
+              </div>
+            </fieldset>
+
+            <!-- 文件扩展名 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendExt">输出文件扩展名</legend>
+              <div class="xnb-hint" style="margin-bottom:6px" data-i18n="xnb.hintExt">默认均为 .xnb；若 Terraria 屏蔽部分扩展名，可改为 .xnc 等</div>
+              <div class="xnb-row">
+                <label style="width:90px" data-i18n="xnb.extEffect">着色器</label>
+                <input type="text" id="xnbExtEffect" value=".xnb" style="max-width:100px" />
+              </div>
+              <div class="xnb-row">
+                <label style="width:90px" data-i18n="xnb.extTexture">贴图</label>
+                <input type="text" id="xnbExtTexture" value=".xnb" style="max-width:100px" />
+              </div>
+              <div class="xnb-row">
+                <label style="width:90px" data-i18n="xnb.extFont">字体</label>
+                <input type="text" id="xnbExtFont" value=".xnb" style="max-width:100px" />
+              </div>
+              <div class="xnb-row">
+                <label style="width:90px" data-i18n="xnb.extModel">模型</label>
+                <input type="text" id="xnbExtModel" value=".xnb" style="max-width:100px" />
+              </div>
+              <div class="xnb-row">
+                <label style="width:90px" data-i18n="xnb.extMaterial">材质</label>
+                <input type="text" id="xnbExtMaterial" value=".xnb" style="max-width:100px" />
+              </div>
+            </fieldset>
+
+            <!-- 模型设置 -->
+            <fieldset class="xnb-fieldset">
+              <legend data-i18n="xnb.legendModel">模型设置</legend>
+              <div class="xnb-row">
+                <label style="white-space:nowrap" data-i18n="xnb.lblModelScale">缩放比例</label>
+                <input type="text" id="xnbModelScale" value="1.0" style="max-width:80px" />
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbSwapWinding" />
+                <label for="xnbSwapWinding" data-i18n="xnb.lblSwapWinding">交换顶点绕序</label>
+              </div>
+              <div class="xnb-row">
+                <input type="checkbox" id="xnbTangents" />
+                <label for="xnbTangents" data-i18n="xnb.lblTangents">生成切线帧（法线/凹凸贴图需要）</label>
+              </div>
+            </fieldset>
+
+          </div>
+        </section>
+
+        <!-- 预览与下载 -->
+        <section class="card panel" style="margin-top:16px">
+          <div class="sectionTitle" data-i18n="xnb.previewTitle">App.config 预览</div>
+          <div class="xnb-action-row" style="margin-top:10px">
+            <button class="btn" type="button" id="xnbGenerate">
+              <i class="fas fa-sync-alt" style="margin-right:6px"></i><span data-i18n="xnb.btnGenerate">生成配置</span>
+            </button>
+            <button class="btn secondary" type="button" id="xnbDownload" disabled>
+              <i class="fas fa-download" style="margin-right:6px"></i><span data-i18n="xnb.btnDownload">下载 App.config</span>
+            </button>
+            <button class="btn secondary" type="button" id="xnbCopy">
+              <i class="fas fa-copy" style="margin-right:6px"></i><span data-i18n="xnb.btnCopy">复制</span>
+            </button>
+          </div>
+          <pre id="xnbPreview" class="xnb-preview" style="margin-top:12px" aria-label="App.config 预览"></pre>
+        </section>
+
+        <!-- 使用说明 -->
+        <section class="card panel" style="margin-top:16px">
+          <div class="sectionTitle" data-i18n="xnb.usageTitle">使用说明</div>
+          <ol style="margin:10px 0 0 18px;line-height:2;font-size:13px">
+            <li data-i18n="xnb.step1">从 GitHub 下载 EasyXnb（或使用本地已有版本）</li>
+            <li data-i18n="xnb.step2">在本页配置好选项，点击「下载 App.config」</li>
+            <li data-i18n="xnb.step3">将下载的 App.config 放入 EasyXnb.exe 同级目录（覆盖原有配置）</li>
+            <li data-i18n="xnb.step4">把要编译的文件（.fx / .png / .fbx 等）放入输入目录</li>
+            <li data-i18n="xnb.step5">运行 EasyXnb.exe，编译结果输出到输出目录</li>
+          </ol>
+          <p class="hint" style="margin-top:10px;font-size:12px" data-i18n="xnb.noteWin">
+            注意：EasyXnb 仅支持 Windows（依赖 XNA Framework），请在 Windows 环境下运行。
+          </p>
+        </section>
+
+        <div class="footer armorCreditFooter">
+          <p class="armorCredit tsOriginCredit">
+            <span data-i18n="xnb.origin">原出处：</span><a href="https://github.com/nickelc/EasyXnb" target="_blank" rel="noopener noreferrer">EasyXnb on GitHub</a>
+          </p>
+          <div data-i18n="footer.credit">tModLoader ArknightsMod - Mornia-Cherry</div>
+          <div>
+            <span style="margin-right:10px;" data-i18n="footer.contact">联系我</span>
+            <a href="https://steamcommunity.com/id/1594962681/" target="_blank" rel="noopener noreferrer">Steam</a>
+            <span style="margin:0 8px;opacity:.65;">|</span>
+            <a href="https://space.bilibili.com/356597012" target="_blank" rel="noopener noreferrer" data-i18n="footer.bilibili">哔哩哔哩</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="toTop" id="toTop" type="button" data-i18n-title="toTop" data-i18n-aria="toTop" title="回到顶部" aria-label="回到顶部">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script defer src="/trtools/js/i18n-es.js?v=9"></script>
+  <script defer src="/trtools/js/i18n.js?v=12"></script>
+  <script defer src="/trtools/js/sidebar-shared.js?v=8"></script>
+  <script defer src="/trtools/js/hot-switch.js?v=7"></script>
+  <script defer src="/trtools/js/app-shell.js?v=11"></script>
+  <script defer src="/trtools/js/visit-track.js?v=1"></script>
+  <script defer src="/trtools/js/online_client.js?v=2"></script>
+  <script defer src="/trtools/js/xnbcompiler.js?v=1"></script>
+  <script>
+    (function () {
+      var toTop = document.getElementById("toTop");
+      if (!toTop) return;
+      window.addEventListener("scroll", function () {
+        toTop.style.display = window.scrollY > 500 ? "flex" : "none";
+      }, { passive: true });
+      toTop.addEventListener("click", function () {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    })();
+  </script>
+</body>
+</html>
