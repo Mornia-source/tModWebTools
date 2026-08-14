@@ -317,7 +317,7 @@ async function renderGifFromSheet(sheet40x1120) {
       quality: 10,
       width: 40,
       height: 56,
-      workerScript: "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js"
+      workerScript: "/trtools/js/gif-local/gif.worker.js"
     });
 
     const temp = createPixelCanvas(40, 56);

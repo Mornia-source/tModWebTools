@@ -902,7 +902,7 @@ async function runSheet2Gif() {
     const W = frames[0].width;
     const H = frames[0].height;
 
-    const mod = await import("https://unpkg.com/gifenc@1.0.1/dist/gifenc.esm.js");
+    const mod = await import("/trtools/js/gifenc-local/gifenc.esm.js");
     const { GIFEncoder, quantize, applyPalette } = mod;
     const gif = GIFEncoder();
 
