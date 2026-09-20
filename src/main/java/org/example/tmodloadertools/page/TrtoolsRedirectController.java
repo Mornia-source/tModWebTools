@@ -35,16 +35,6 @@ public class TrtoolsRedirectController {
         return redirectRootTool("armorhelper");
     }
 
-    @GetMapping("/armorcodegen.html")
-    public ResponseEntity<Void> armorCodeGen() {
-        return redirectRootTool("armorcodegen");
-    }
-
-    @GetMapping("/prtsarmorgen.html")
-    public ResponseEntity<Void> prtsArmorGen() {
-        return redirectRootTool("prtsarmorgen");
-    }
-
     @GetMapping("/tool14to13.html")
     public ResponseEntity<Void> tool14To13() {
         return redirectRootTool("tool14to13");
@@ -80,11 +70,6 @@ public class TrtoolsRedirectController {
         return redirectRootTool("tmodunpacker");
     }
 
-    @GetMapping("/terrasavr.html")
-    public ResponseEntity<Void> terrasavrRoot() {
-        return redirectRootTool("terrasavr");
-    }
-
     @GetMapping("/effecteditor.html")
     public ResponseEntity<Void> effectEditorRoot() {
         return redirectRootTool("effecteditor");
@@ -111,16 +96,6 @@ public class TrtoolsRedirectController {
     @GetMapping("/trtools/armorhelper.html")
     public ResponseEntity<byte[]> trtoolsArmor() {
         return serveTrtoolsHtml("armorhelper");
-    }
-
-    @GetMapping("/trtools/armorcodegen.html")
-    public ResponseEntity<byte[]> trtoolsArmorCode() {
-        return serveTrtoolsHtml("armorcodegen");
-    }
-
-    @GetMapping("/trtools/prtsarmorgen.html")
-    public ResponseEntity<byte[]> trtoolsPrtsArmorGen() {
-        return serveTrtoolsHtml("prtsarmorgen");
     }
 
     @GetMapping("/trtools/tool14to13.html")
@@ -156,11 +131,6 @@ public class TrtoolsRedirectController {
     @GetMapping("/trtools/tmodunpacker.html")
     public ResponseEntity<byte[]> trtoolsTmodUnpacker() {
         return serveTrtoolsHtml("tmodunpacker");
-    }
-
-    @GetMapping("/trtools/terrasavr.html")
-    public ResponseEntity<byte[]> trtoolsTerrasavr() {
-        return serveTrtoolsHtml("terrasavr");
     }
 
     @GetMapping("/download/armor-preview-1413.aseprite-extension")

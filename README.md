@@ -1,6 +1,6 @@
 # tModWebTools
 
-面向 Terraria / tModLoader 模组开发的在线工具集：贴图与精灵处理、音频转换、`.tmod` 解包、PRTS 盔甲代码生成等，全部在浏览器中完成，可自建部署。
+面向 Terraria / tModLoader 模组开发的在线工具集：贴图与精灵处理、音频转换、`.tmod` 解包、特效编辑等，全部在浏览器中完成，可自建部署。
 
 - 线上站点：https://trtool.yingtaoshu.org/
 - 定位：轻量、实用、可自托管，方便模组作者日常资源处理
@@ -15,14 +15,11 @@
 |------|------|
 | 切片图工具 | 图集切片、拼接、GIF 与精灵表互转等 |
 | 装备帧生成器（ArmorHelper） | 按模板批量导出盔甲帧 |
-| PRTS 盔甲生成器 | 从 PRTS Wiki 拉取干员数据，生成 ArknightsMod 盔甲 C# 代码 |
-| 盔甲代码生成器 | 基于材料/干员配置的盔甲代码生成（网页移植版） |
 | 躯干格式转换器 | 1.4 / 1.3 躯干精灵格式互转 |
 | 1.4 材质图转 1.3 | 盔甲材质图版本转换 |
 | 物块生成器（TextureSplitter） | 物块/墙贴图拆分与处理 |
 | OGG 转换 | 批量将音频转为 Terraria 常用 OGG（浏览器端 FFmpeg） |
 | .tMod 文件解包 | 上传 `.tmod`，服务端解包并下载资源 |
-| 角色存档编辑器（Terrasavr） | 内嵌 Terrasavr 页面 |
 | 特效编辑生成器 1.4.4（tFX） | 内嵌独立维护的 tEffectEditor，图形化编辑刀光/拖尾/粒子并导出 C#（见下方「外置编辑器部署」） |
 | Aseprite 插件 | 插件说明与下载入口 |
 
@@ -54,7 +51,7 @@
 
 ```
 tModWebTools/
-├── src/main/java/          # Spring 控制器与服务（解包、统计、PRTS 代理等）
+├── src/main/java/          # Spring 控制器与服务（解包、统计等）
 ├── src/main/resources/
 │   ├── application.properties
 │   └── static/
@@ -155,9 +152,8 @@ proxy_set_header X-Forwarded-Proto $scheme;
 # proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
 ```
 
-4. **PRTS 盔甲生成器**需要服务器能出站访问 `https://prts.wiki`（可在 `application.properties` 调整超时与重试）。
-5. **访问统计 CSV** 默认写在 **JAR 同级目录** 的 `trtools-visit-stats.csv`，请保证该目录可写。
-6. **`.tmod` 解包**上传上限约 200MB（见 `application.properties` 中 `spring.servlet.multipart` 配置）。
+4. **访问统计 CSV** 默认写在 **JAR 同级目录** 的 `trtools-visit-stats.csv`，请保证该目录可写。
+5. **`.tmod` 解包**上传上限约 200MB（见 `application.properties` 中 `spring.servlet.multipart` 配置）。
 
 ### 可选：JAR 旁视频文件
 
@@ -183,14 +179,12 @@ proxy_set_header X-Forwarded-Proto $scheme;
 |--------|------|
 | `server.forward-headers-strategy=framework` | 反代后正确识别 HTTPS 与 Host |
 | `spring.servlet.multipart.max-file-size` | `.tmod` 上传大小上限 |
-| `trtools.prts.api-url` | PRTS Wiki API 地址 |
-| `trtools.prts.*-timeout-*` / `max-retries` | PRTS 请求超时与重试 |
 | `trtools.effecteditor.dir` | 外置 tEffectEditor 目录绝对路径（留空则自动探测 JAR 同级 `tEffectEditor/`） |
 
 生产环境也可通过外部 `application.properties` 或启动参数覆盖，例如：
 
 ```bash
-java -jar tModLoaderTools-0.0.1-SNAPSHOT.jar --server.port=8080 --trtools.prts.request-timeout-seconds=120
+java -jar tModLoaderTools-0.0.1-SNAPSHOT.jar --server.port=8080
 ```
 
 ---
@@ -223,13 +217,12 @@ node scripts/emit-i18n-es.mjs
 | `POST /trtools/track` | 记录访问（前端 `visit-track.js`） |
 | `GET /trtools/stats/*` | 访问统计 JSON |
 | `POST /trtools/unpack` | `.tmod` 解包 |
-| `GET /trtools/prts/wikitext` | PRTS Wiki 代理 |
 | `GET /video/catalog`、`GET /video/stream` | 视频目录与流 |
 
 ---
 
 ## 致谢与说明
 
-本站由 **Mornia-Cherry** 维护，面向 tModLoader 模组制作流程中的常见资源处理需求。PRTS 盔甲生成等部分逻辑移植自相关开源项目，具体署名见各工具页页脚。
+本站由 **Mornia-Cherry** 维护，面向 tModLoader 模组制作流程中的常见资源处理需求。部分逻辑移植自相关开源项目，具体署名见各工具页页脚。
 
 如有文案或翻译错误，欢迎通过站点页脚的反馈渠道联系。

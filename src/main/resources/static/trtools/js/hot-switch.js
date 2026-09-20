@@ -7,8 +7,6 @@
     "index.html": "tilesheet",
     "oggconvert.html": "oggconvert",
     "armorhelper.html": "armorhelper",
-    "armorcodegen.html": "armorcodegen",
-    "prtsarmorgen.html": "prtsarmorgen",
     "tool14to13.html": "tool14to13",
     "aseprite-plugin.html": "asepriteplugin",
     "spritetransform.html": "spritetransform",
@@ -16,7 +14,6 @@
     "stats.html": "stats",
     "settings.html": "settings",
     "tmodunpacker.html": "tmodunpacker",
-    "terrasavr.html": "terrasavr",
     "effecteditor.html": "effecteditor"
   };
 
