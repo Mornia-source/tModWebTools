@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html?v=11";
-  var SHELL_CSS_URL = "/trtools/css/trtools-shell.css?v=8";
+  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html";
+  var SHELL_CSS_URL = "/trtools/css/trtools-shell.css";
 
   function ensureShellStyles() {
     if (document.getElementById("twtShellStyles")) return;

@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public final class StaticAssetFingerprintTool {
 
     private static final Pattern HTML_ASSET_REF = Pattern.compile(
-        "/trtools/(js|css)/([A-Za-z0-9_.-]+\\.(?:js|css))(?:\\?v=[A-Za-z0-9_.-]+)?"
+        "/trtools/(js|css|html/partials)/([A-Za-z0-9_.-]+\\.(?:js|css|html))(?:\\?v=[A-Za-z0-9_.-]+)?"
     );
 
     private StaticAssetFingerprintTool() {
@@ -38,63 +38,65 @@ public final class StaticAssetFingerprintTool {
             throw new IllegalStateException("Expected trtools html/js/css directories under " + staticRoot);
         }
 
+        // 顺序很重要：被引用者（css、侧栏 partial）先算指纹，再处理引用它们的 js。
+        // js 内对 css/partial 的引用先改写成带指纹的路径，再对改写后的内容算 js 自身指纹，
+        // 这样 css/partial 的变化会传导到 js 文件名上，源码里无需手工维护 ?v=。
         Map<String, String> manifest = new HashMap<>();
-        fingerprintDirectory(jsDir, "js", manifest);
-        fingerprintDirectory(cssDir, "css", manifest);
+        fingerprintDirectory(cssDir, "css", "css", false, manifest);
+        fingerprintDirectory(htmlDir.resolve("partials"), "html/partials", "html", false, manifest);
+        fingerprintDirectory(jsDir, "js", "js", true, manifest);
         rewriteHtmlFiles(htmlDir, manifest);
-        rewriteJsFiles(jsDir, manifest);
         writeManifest(trtoolsRoot.resolve("asset-manifest.json"), manifest);
     }
 
-    private static void fingerprintDirectory(Path dir, String kind, Map<String, String> manifest) throws Exception {
+    private static void fingerprintDirectory(Path dir, String urlDir, String ext, boolean rewriteRefs,
+                                             Map<String, String> manifest) throws Exception {
+        if (!Files.isDirectory(dir)) {
+            return;
+        }
         List<Path> files = new ArrayList<>();
         try (var stream = Files.list(dir)) {
             stream.filter(Files::isRegularFile)
-                .filter(path -> path.getFileName().toString().endsWith("." + kind))
-                .filter(path -> !isFingerprinted(path.getFileName().toString(), kind))
+                .filter(path -> path.getFileName().toString().endsWith("." + ext))
+                .filter(path -> !isFingerprinted(path.getFileName().toString(), ext))
                 .sorted(Comparator.comparing(path -> path.getFileName().toString()))
                 .forEach(files::add);
         }
 
         for (Path file : files) {
-            byte[] content = Files.readAllBytes(file);
+            byte[] content;
+            if (rewriteRefs) {
+                String rewritten = rewriteRefs(Files.readString(file, StandardCharsets.UTF_8), manifest);
+                Files.writeString(file, rewritten, StandardCharsets.UTF_8);
+                content = rewritten.getBytes(StandardCharsets.UTF_8);
+            } else {
+                content = Files.readAllBytes(file);
+            }
             String fileName = file.getFileName().toString();
             int dot = fileName.lastIndexOf('.');
             String baseName = fileName.substring(0, dot);
-            String ext = fileName.substring(dot);
+            String extension = fileName.substring(dot);
             String hash = sha256Hex(content).substring(0, 10);
-            String fingerprintedName = baseName + "." + hash + ext;
-            Path fingerprintedPath = file.resolveSibling(fingerprintedName);
-            Files.write(fingerprintedPath, content);
-            manifest.put("/trtools/" + kind + "/" + fileName, "/trtools/" + kind + "/" + fingerprintedName);
+            String fingerprintedName = baseName + "." + hash + extension;
+            Files.write(file.resolveSibling(fingerprintedName), content);
+            manifest.put("/trtools/" + urlDir + "/" + fileName, "/trtools/" + urlDir + "/" + fingerprintedName);
         }
     }
 
-    private static boolean isFingerprinted(String fileName, String kind) {
-        return fileName.matches(".+\\.[0-9a-f]{10}\\." + Pattern.quote(kind));
+    private static boolean isFingerprinted(String fileName, String ext) {
+        return fileName.matches(".+\\.[0-9a-f]{10}\\." + Pattern.quote(ext));
     }
 
     private static void rewriteHtmlFiles(Path htmlDir, Map<String, String> manifest) throws IOException {
         try (var stream = Files.list(htmlDir)) {
             for (Path htmlFile : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".html")).toList()) {
-                rewriteAssetRefs(htmlFile, manifest);
+                String content = Files.readString(htmlFile, StandardCharsets.UTF_8);
+                Files.writeString(htmlFile, rewriteRefs(content, manifest), StandardCharsets.UTF_8);
             }
         }
     }
 
-    private static void rewriteJsFiles(Path jsDir, Map<String, String> manifest) throws IOException {
-        try (var stream = Files.list(jsDir)) {
-            for (Path jsFile : stream.filter(Files::isRegularFile).filter(path -> path.getFileName().toString().endsWith(".js")).toList()) {
-                if (isFingerprinted(jsFile.getFileName().toString(), "js")) {
-                    continue;
-                }
-                rewriteAssetRefs(jsFile, manifest);
-            }
-        }
-    }
-
-    private static void rewriteAssetRefs(Path file, Map<String, String> manifest) throws IOException {
-        String content = Files.readString(file, StandardCharsets.UTF_8);
+    private static String rewriteRefs(String content, Map<String, String> manifest) {
         Matcher matcher = HTML_ASSET_REF.matcher(content);
         StringBuffer rewritten = new StringBuffer();
         while (matcher.find()) {
@@ -103,7 +105,7 @@ public final class StaticAssetFingerprintTool {
             matcher.appendReplacement(rewritten, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(rewritten);
-        Files.writeString(file, rewritten.toString(), StandardCharsets.UTF_8);
+        return rewritten.toString();
     }
 
     private static void writeManifest(Path manifestPath, Map<String, String> manifest) throws IOException {
