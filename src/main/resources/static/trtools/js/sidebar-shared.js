@@ -71,6 +71,8 @@
 
   function ensureFriendBanner() {
     if (document.getElementById("twtFriendBanner")) return;
+    // 横幅只在切片图工具（index）页显示
+    if (!document.body || document.body.getAttribute("data-twt-active") !== "index") return;
     var top = document.querySelector(".appMainInner > .appTopBar");
     if (!top) return;
     var a = document.createElement("a");

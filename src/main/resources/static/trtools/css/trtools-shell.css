@@ -443,7 +443,7 @@ textarea.textInput:focus {
   }
 }
 
-/* 友站横幅（由 sidebar-shared.js 注入到各工具页顶栏下方） */
+/* 友站横幅（由 sidebar-shared.js 注入到切片图工具页顶栏下方） */
 .twtFriendBanner{
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   margin:0 0 14px; padding:10px 16px; border-radius:12px;
