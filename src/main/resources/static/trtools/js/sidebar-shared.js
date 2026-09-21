@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html?v=9";
-  var SHELL_CSS_URL = "/trtools/css/trtools-shell.css?v=6";
+  var PARTIAL_URL = "/trtools/html/partials/app-sidebar-inner.html?v=10";
+  var SHELL_CSS_URL = "/trtools/css/trtools-shell.css?v=7";
 
   function ensureShellStyles() {
     if (document.getElementById("twtShellStyles")) return;
@@ -69,10 +69,29 @@
     } catch (_) {}
   }
 
+  function ensureFriendBanner() {
+    if (document.getElementById("twtFriendBanner")) return;
+    var top = document.querySelector(".appMainInner > .appTopBar");
+    if (!top) return;
+    var a = document.createElement("a");
+    a.id = "twtFriendBanner";
+    a.className = "twtFriendBanner";
+    a.href = "https://www.kdocs.cn/l/crP1DDFrTik8";
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.innerHTML =
+      '<i class="fas fa-book-open" aria-hidden="true"></i>' +
+      '<span class="twtFriendBannerTag" data-i18n="nav.bannerTag">友站推荐</span>' +
+      '<span class="twtFriendBannerName" data-i18n="nav.friendLeaf">叶子的tMod泰拉模组教程</span>' +
+      '<span class="twtFriendBannerGo"><span data-i18n="nav.bannerGo">前往查看</span> <i class="fas fa-external-link-alt" aria-hidden="true"></i></span>';
+    top.parentNode.insertBefore(a, top.nextSibling);
+  }
+
   function injectSidebar(html) {
     var mount = document.getElementById("appSidebarInnerMount");
     if (!mount || !mount.parentNode) return false;
     mount.outerHTML = String(html || "").trim();
+    ensureFriendBanner();
     applySidebarActive();
     try {
       if (window.TWT_I18N && typeof window.TWT_I18N.apply === "function") {
