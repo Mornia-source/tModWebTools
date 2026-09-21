@@ -48,7 +48,9 @@ body.appBody {
 }
 
 /* 侧边栏导航：带边框选项卡 */
-.appNav .appNavLink.pageTab {
+.appNav .appNavLink.pageTab,
+/* 侧边栏导航：带边框选项卡 */
+.appNav .appNavLink.appNavLink--ext {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: center;
@@ -68,7 +70,8 @@ body.appBody {
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
 
-.appNav .appNavLink.pageTab:hover {
+.appNav .appNavLink.pageTab:hover,
+.appNav .appNavLink.appNavLink--ext:hover {
   background: rgba(var(--twt-surface-a), 0.45);
   border-color: rgba(var(--twt-accent), 0.28);
   color: rgba(15, 27, 20, 0.96);
@@ -82,7 +85,8 @@ body.appBody {
   font-weight: 700;
 }
 
-.appNav .appNavLink.pageTab .tabIcon {
+.appNav .appNavLink.pageTab .tabIcon,
+.appNav .appNavLink.appNavLink--ext .tabIcon {
   grid-column: 1;
   grid-row: 1;
   width: 16px;
@@ -94,7 +98,8 @@ body.appBody {
 }
 
 .appNav .appNavLink.pageTab > .appNavLabel,
-.appNav .appNavLink.pageTab > span:not(.appNavBadge):not(.tabIcon) {
+.appNav .appNavLink.pageTab > span:not(.appNavBadge):not(.tabIcon),
+.appNav .appNavLink.appNavLink--ext > .appNavLabel {
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
@@ -407,7 +412,8 @@ textarea.textInput:focus {
     padding: 12px 10px 18px !important;
   }
 
-  .appNav .appNavLink.pageTab {
+  .appNav .appNavLink.pageTab,
+.appNav .appNavLink.appNavLink--ext {
     padding: 9px 10px 9px 7px;
     font-size: 14px;
   }
