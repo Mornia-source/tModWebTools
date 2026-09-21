@@ -65,6 +65,11 @@ public class TrtoolsRedirectController {
         return redirectRootTool("settings");
     }
 
+    @GetMapping("/xnbcompiler.html")
+    public ResponseEntity<Void> xnbCompilerRoot() {
+        return redirectRootTool("xnbcompiler");
+    }
+
     @GetMapping("/tmodunpacker.html")
     public ResponseEntity<Void> tmodUnpackerRoot() {
         return redirectRootTool("tmodunpacker");
@@ -126,6 +131,11 @@ public class TrtoolsRedirectController {
     @GetMapping("/trtools/settings.html")
     public ResponseEntity<byte[]> trtoolsSettings() {
         return serveTrtoolsHtml("settings");
+    }
+
+    @GetMapping("/trtools/xnbcompiler.html")
+    public ResponseEntity<byte[]> trtoolsXnbCompiler() {
+        return serveTrtoolsHtml("xnbcompiler");
     }
 
     @GetMapping("/trtools/tmodunpacker.html")

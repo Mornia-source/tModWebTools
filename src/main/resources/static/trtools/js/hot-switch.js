@@ -14,6 +14,7 @@
     "stats.html": "stats",
     "settings.html": "settings",
     "tmodunpacker.html": "tmodunpacker",
+    "xnbcompiler.html": "xnbcompiler",
     "effecteditor.html": "effecteditor"
   };
 
