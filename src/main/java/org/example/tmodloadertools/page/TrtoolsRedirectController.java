@@ -30,6 +30,11 @@ public class TrtoolsRedirectController {
         return redirectRootTool("oggconvert");
     }
 
+    @GetMapping("/npcframes.html")
+    public ResponseEntity<Void> npcFramesRoot() {
+        return redirectRootTool("npcframes");
+    }
+
     @GetMapping("/armorhelper.html")
     public ResponseEntity<Void> armorHelper() {
         return redirectRootTool("armorhelper");
@@ -96,6 +101,11 @@ public class TrtoolsRedirectController {
     @GetMapping("/trtools/oggconvert.html")
     public ResponseEntity<byte[]> trtoolsOgg() {
         return serveTrtoolsHtml("oggconvert");
+    }
+
+    @GetMapping("/trtools/npcframes.html")
+    public ResponseEntity<byte[]> trtoolsNpcFrames() {
+        return serveTrtoolsHtml("npcframes");
     }
 
     @GetMapping("/trtools/armorhelper.html")

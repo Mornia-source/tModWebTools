@@ -7,6 +7,7 @@
     "index.html": "tilesheet",
     "oggconvert.html": "oggconvert",
     "armorhelper.html": "armorhelper",
+    "npcframes.html": "npcframes",
     "tool14to13.html": "tool14to13",
     "aseprite-plugin.html": "asepriteplugin",
     "spritetransform.html": "spritetransform",
