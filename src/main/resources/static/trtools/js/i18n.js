@@ -1,18 +1,19 @@
 // tModWebTools 站点文案：localStorage trtools.lang = zh-CN | en | es（西语词条见 i18n-es.js，先于本文件加载）
-// 主题：trtools.theme = national|emerald|ocean|violet|amber|rose|teal（由设置页写入，head 内联脚本抢先读）
-// 默认主题（DEFAULT_THEME）临时为“国庆”。只有在设置页手动选择过（trtools.themeChosen=1）才使用存储值；
-// 旧版本会把 emerald 自动写入存储，因此“存的是 emerald 但没有手动选择标记”也视为未选择。
-// 节日结束后把 DEFAULT_THEME 与各页 head 内联脚本中的 "national" 改回 "emerald" 即可。
+// 主题：trtools.theme = national|emerald|ocean|violet|amber|rose|teal（由设置页写入）；判定逻辑见 page-boot.js
 (function () {
   "use strict";
 
   var LANG_KEY = "trtools.lang";
   var THEME_KEY = "trtools.theme";
-  var THEME_CHOSEN_KEY = "trtools.themeChosen";
-  var DEFAULT_THEME = "national";
-  var THEME_RE = /^(national|emerald|ocean|violet|amber|rose|teal)$/;
-  // 节日期间强制使用的主题（为空则不强制）。节后改为 "" 并删除各页 head 与 sidebar-shared.js 中标注 FORCE_THEME 的行
-  var FORCE_THEME = "national";
+  // 主题判定统一由 page-boot.js 的 window.TWT_THEME 提供（默认主题、节日强制主题都在那里改）
+  var THEME = window.TWT_THEME || {
+    CHOSEN_KEY: "trtools.themeChosen",
+    RE: /^(national|emerald|ocean|violet|amber|rose|teal)$/,
+    DEFAULT: "emerald",
+    FORCE: "",
+    chosen: function () { return "emerald"; },
+    current: function () { return "emerald"; }
+  };
 
   var ZH = {
     "loading.text": "加载中…",
@@ -1090,16 +1091,13 @@
     }
   }
 
-  // 用户自己选择（或默认）的主题，不受强制影响；设置页用它显示选中状态
   function getChosenTheme() {
-    try {
-      var v = localStorage.getItem(THEME_KEY);
-      var chosen = localStorage.getItem(THEME_CHOSEN_KEY) === "1";
-      if (!chosen && (!v || v === "emerald")) return DEFAULT_THEME;
-      return THEME_RE.test(v) ? v : DEFAULT_THEME;
-    } catch (_) {
-      return DEFAULT_THEME;
-    }
+    return THEME.chosen();
+  }
+
+  // 实际显示的主题（节日期间可能被强制）
+  function getTheme() {
+    return THEME.current();
   }
 
   function tpl(str, map) {
@@ -1179,17 +1177,12 @@
     apply(document);
   }
 
-  // 实际显示的主题：节日期间强制
-  function getTheme() {
-    return FORCE_THEME || getChosenTheme();
-  }
-
   // 设置页手动选择主题：写入存储并记下“手动选择”标记（强制期间保存选择，节后生效）
   function setTheme(name) {
-    var th = THEME_RE.test(name) ? name : DEFAULT_THEME;
+    var th = THEME.RE.test(name) ? name : THEME.DEFAULT;
     try {
       localStorage.setItem(THEME_KEY, th);
-      localStorage.setItem(THEME_CHOSEN_KEY, "1");
+      localStorage.setItem(THEME.CHOSEN_KEY, "1");
     } catch (_) {}
     document.documentElement.setAttribute("data-trtheme", getTheme());
   }
@@ -1206,7 +1199,7 @@
     getLang: getLang,
     getTheme: getTheme,
     getChosenTheme: getChosenTheme,
-    forcedTheme: FORCE_THEME,
+    forcedTheme: THEME.FORCE,
     t: t,
     apply: apply,
     setLang: setLang,

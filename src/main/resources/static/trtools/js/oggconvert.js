@@ -6,13 +6,7 @@ const OGG_HTTP_ENV = /^https?:$/i.test(location.protocol);
 
 const el = (id) => document.getElementById(id);
 
-function twtT(k, vars) {
-  try {
-    if (typeof window.TWT_I18N !== "undefined" && window.TWT_I18N.t) return window.TWT_I18N.t(k, vars);
-  } catch (_) {}
-  return k;
-}
-
+// twtT 由 page-boot.js 全局提供
 const ACCEPT_EXT = new Set(["mp3", "wma", "m4a", "aac", "flac", "wav", "ogg", "oga"]);
 
 const refs = {

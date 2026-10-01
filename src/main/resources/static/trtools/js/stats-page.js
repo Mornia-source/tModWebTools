@@ -19,13 +19,7 @@
   var availableWeeks = [];
   var availableMonths = [];
 
-  function twtT(k, vars) {
-    try {
-      if (window.TWT_I18N && typeof window.TWT_I18N.t === "function") return window.TWT_I18N.t(k, vars);
-    } catch (_) {}
-    return k;
-  }
-
+  // twtT 由 page-boot.js 全局提供
   function accentRgb() {
     try {
       var s = getComputedStyle(document.documentElement).getPropertyValue("--twt-accent").trim();

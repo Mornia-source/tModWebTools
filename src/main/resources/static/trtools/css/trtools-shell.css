@@ -108,7 +108,7 @@ body.appBody {
   white-space: nowrap;
 }
 
-/* 新旧标签：与父级链接状态完全解耦，固定配色 */
+/* 侧边栏徽标（如“新工具”）：与父级链接状态完全解耦，固定配色 */
 .appNav .appNavLink.pageTab > .appNavBadge {
   grid-column: 3;
   grid-row: 1;
@@ -136,24 +136,11 @@ body.appBody {
   border: 1px solid #8fc9a0;
 }
 
-.appNav .appNavLink.pageTab > .appNavBadge--old {
-  color: #5c6460;
-  background: #e4e8e5;
-  border: 1px solid #bcc4be;
-}
-
 .appNav .appNavLink.pageTab:hover > .appNavBadge--new,
 .appNav .appNavLink.pageTab.active > .appNavBadge--new {
   color: #145a32;
   background: #d8f0de;
   border-color: #8fc9a0;
-}
-
-.appNav .appNavLink.pageTab:hover > .appNavBadge--old,
-.appNav .appNavLink.pageTab.active > .appNavBadge--old {
-  color: #5c6460;
-  background: #e4e8e5;
-  border-color: #bcc4be;
 }
 
 .appSidebarFooter {

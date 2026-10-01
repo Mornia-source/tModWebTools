@@ -4,25 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title data-i18n-doc="meta.titleXnbCompiler">XNB 编译器 — tModWebTools</title>
-  <script>
-    (function () {
-      try {
-        var lang = localStorage.getItem("trtools.lang") || "zh-CN";
-        var theme = localStorage.getItem("trtools.theme");
-        if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
-        theme = "national"; // FORCE_THEME：国庆期间强制，节后删除此行
-        var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
-        var TBOOT = {
-          "meta.titleXnbCompiler": { zh: "XNB 编译器 — tModWebTools", en: "XNB Compiler — tModWebTools", es: "Compilador XNB — tModWebTools" }
-        };
-        var _tt = document.querySelector("title[data-i18n-doc]");
-        var _key = _tt && _tt.getAttribute("data-i18n-doc");
-        if (_key && TBOOT[_key]) document.title = TBOOT[_key][lt];
-        document.documentElement.setAttribute("lang", lang === "zh-CN" ? "zh-CN" : lang === "es" ? "es" : "en");
-        document.documentElement.setAttribute("data-trtheme", theme);
-      } catch (e) {}
-    })();
-  </script>
+  <script src="/trtools/js/page-boot.js"></script>
   <link rel="preload" href="/trtools/css/trtools.css" as="style" />
   <link rel="stylesheet" href="/trtools/css/fontawesome-local/css/all.min.css" />
   <noscript><link rel="stylesheet" href="/trtools/css/fontawesome-local/css/all.min.css" /></noscript>

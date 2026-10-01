@@ -10,13 +10,7 @@ const ARMOR_MODES = [
   { key: "GIFFullArmorFemale", labelKey: "armor.modeGifFullF", label: "完整套装GIF-女 (GIF Full Armor Female)", gif: true }
 ];
 
-function twtT(k, vars) {
-  try {
-    if (typeof window.TWT_I18N !== "undefined" && window.TWT_I18N.t) return window.TWT_I18N.t(k, vars);
-  } catch (_) {}
-  return k;
-}
-
+// twtT 由 page-boot.js 全局提供
 function armorModeLabel(m) {
   const t = twtT(m.labelKey);
   return t === m.labelKey ? m.label : t;

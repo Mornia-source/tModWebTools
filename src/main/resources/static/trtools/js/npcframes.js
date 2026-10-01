@@ -58,12 +58,7 @@
     animTimer: null
   };
 
-  function twtT(k, vars) {
-    try {
-      if (window.TWT_I18N && window.TWT_I18N.t) return window.TWT_I18N.t(k, vars);
-    } catch (_) {}
-    return k;
-  }
+  // twtT 由 page-boot.js 全局提供
   function tr(k, fallback, vars) {
     const v = twtT(k, vars);
     return v === k ? fallback : v;

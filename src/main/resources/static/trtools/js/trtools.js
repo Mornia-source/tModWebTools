@@ -1,11 +1,6 @@
 const el = (id) => document.getElementById(id);
 const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
-function twtT(k, vars) {
-  try {
-    if (typeof window.TWT_I18N !== "undefined" && window.TWT_I18N.t) return window.TWT_I18N.t(k, vars);
-  } catch (_) {}
-  return k;
-}
+// twtT 由 page-boot.js 全局提供
 const fmt = (n) => Number(n).toLocaleString("en-US");
 const state = {
   files: [],
