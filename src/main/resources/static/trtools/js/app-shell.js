@@ -202,3 +202,61 @@
     if (e.target && e.target.closest && e.target.closest(".twtSample")) e.preventDefault();
   });
 })();
+
+// 示例模板图悬停放大：浮层挂在 body 上，fixed 定位并限制在视口内
+(function () {
+  "use strict";
+  var pop = null;
+
+  function show(el) {
+    var cs = getComputedStyle(el);
+    var img = cs.getPropertyValue("--twt-sample").trim();
+    var ratioStr = cs.getPropertyValue("--twt-sample-ratio").trim() || "1.6";
+    var parts = ratioStr.split("/").map(parseFloat);
+    var ratio = parts.length === 2 && parts[1] ? parts[0] / parts[1] : parseFloat(ratioStr) || 1.6;
+    if (!pop) {
+      pop = document.createElement("div");
+      pop.className = "twtSamplePop";
+      document.body.appendChild(pop);
+    }
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var margin = 12;
+    var w = Math.min(480, vw - margin * 2);
+    var h = w / ratio;
+    if (h > vh - margin * 2) {
+      h = vh - margin * 2;
+      w = h * ratio;
+    }
+    var r = el.getBoundingClientRect();
+    // 优先放在示例图左侧，空间不够则放在下方/上方
+    var left = r.left - w - margin;
+    var top = r.top;
+    if (left < margin) {
+      left = Math.min(Math.max(margin, r.right - w), vw - w - margin);
+      top = r.bottom + margin;
+      if (top + h > vh - margin) top = r.top - h - margin;
+    }
+    top = Math.min(Math.max(margin, top), vh - h - margin);
+    pop.style.backgroundImage = img;
+    pop.style.width = w + "px";
+    pop.style.height = h + "px";
+    pop.style.left = left + "px";
+    pop.style.top = top + "px";
+    pop.style.display = "block";
+  }
+
+  function hide() {
+    if (pop) pop.style.display = "none";
+  }
+
+  document.addEventListener("mouseover", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest(".twtSample") : null;
+    if (el) show(el);
+  });
+  document.addEventListener("mouseout", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest(".twtSample") : null;
+    if (el && !el.contains(e.relatedTarget)) hide();
+  });
+  window.addEventListener("scroll", hide, true);
+})();

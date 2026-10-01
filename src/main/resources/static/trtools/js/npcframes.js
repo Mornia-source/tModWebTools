@@ -39,7 +39,7 @@
     faceCanvas: el("npcFaceCanvas"), faceResetBtn: el("npcFaceReset"),
     editEyes: el("npcEditEyes"), editMouth: el("npcEditMouth"),
     paintCanvas: el("npcPaintCanvas"), paintColor: el("npcPaintColor"),
-    paintPen: el("npcPaintPen"), paintRestore: el("npcPaintRestore"), paintClear: el("npcPaintClear"),
+    paintPen: el("npcPaintPen"), paintPick: el("npcPaintPick"), paintRestore: el("npcPaintRestore"), paintClear: el("npcPaintClear"),
     strip: el("npcStrip"), stripHost: el("npcStripHost"),
     anim: el("npcAnim"), animSel: el("npcAnimSel"),
     download: el("npcDownload"), downloadStrip: el("npcDownloadStrip"),
@@ -633,6 +633,8 @@
   function setPaintTool(t) {
     state.paintTool = t;
     refs.paintPen.classList.toggle("secondary", t !== "pen");
+    refs.paintPick.classList.toggle("secondary", t !== "pick");
+    refs.paintCanvas.style.cursor = t === "pick" ? "copy" : "crosshair";
     refs.paintRestore.classList.toggle("secondary", t !== "restore");
   }
 
@@ -653,26 +655,29 @@
   }
 
   refs.paintCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  // 吸色：取闭眼帧当前像素的颜色，取完切回画笔
+  function pickAt(e) {
+    const p = canvasPixel(refs.paintCanvas, e);
+    if (!p || !state.blinkArt) return;
+    const px = ctx2d(state.blinkArt).getImageData(p[0], p[1], 1, 1).data;
+    if (px[3] === 0) return;
+    refs.paintColor.value = rgbToHex(px);
+    setPaintTool("pen");
+  }
+
   refs.paintCanvas.addEventListener("mousedown", (e) => {
     e.preventDefault();
-    if (e.button === 2) {
-      // 右键吸色
-      const p = canvasPixel(refs.paintCanvas, e);
-      if (p && state.blinkArt) {
-        const px = ctx2d(state.blinkArt).getImageData(p[0], p[1], 1, 1).data;
-        if (px[3] > 0) {
-          refs.paintColor.value = rgbToHex(px);
-          setPaintTool("pen");
-        }
-      }
+    if (e.button === 2 || (e.button === 0 && state.paintTool === "pick")) {
+      pickAt(e);
       return;
     }
     if (e.button === 0) paintAt(e);
   });
   refs.paintCanvas.addEventListener("mousemove", (e) => {
-    if (e.buttons & 1) paintAt(e);
+    if (e.buttons & 1 && state.paintTool !== "pick") paintAt(e);
   });
   refs.paintPen.addEventListener("click", () => setPaintTool("pen"));
+  refs.paintPick.addEventListener("click", () => setPaintTool("pick"));
   refs.paintRestore.addEventListener("click", () => setPaintTool("restore"));
   refs.paintClear.addEventListener("click", () => {
     state.blinkPaint.clear();

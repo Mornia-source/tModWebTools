@@ -1259,14 +1259,12 @@ canvas{ width:100%; height:auto; border:1px solid var(--line); border-radius:16p
   content:attr(data-label); position:absolute; left:0; right:0; top:100%; margin-top:2px;
   text-align:center; font-size:11px; color:var(--muted);
 }
-.twtSample::after{
-  content:""; position:absolute; right:0; top:calc(100% + 18px); z-index:50; width:min(480px, 70vw);
-  aspect-ratio:var(--twt-sample-ratio, 1.6); background:#fff var(--twt-sample) center/contain no-repeat;
-  image-rendering:pixelated; border:1px solid var(--line); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,.18);
-  opacity:0; visibility:hidden; transition:opacity .12s; pointer-events:none;
-}
 .twtSample:hover{ outline:2px solid rgb(var(--twt-accent)); }
-.twtSample:hover::after{ opacity:1; visibility:visible; }
+/* 悬停放大预览：由 app-shell.js 挂到 body 上并用 fixed 定位，避免被卡片的 overflow 裁切 */
+.twtSamplePop{
+  position:fixed; z-index:9999; pointer-events:none; background:#fff center/contain no-repeat;
+  image-rendering:pixelated; border:1px solid var(--line); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
 @media (max-width:640px){
   .twtSampleHost{ padding-right:12px; }
   .twtSample{ position:relative; top:auto; right:auto; margin:0 auto 22px; }
