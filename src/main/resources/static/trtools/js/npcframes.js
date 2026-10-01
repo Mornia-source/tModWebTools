@@ -219,10 +219,19 @@
     return c;
   }
 
-  // 站立帧去掉前臂（手势帧换手用）
+  // 站立帧去掉前臂（手臂画在身体前面时换手用）
   function idleWithoutFrontArm(L) {
     const c = canvas(FW, FH);
     for (const part of [L.legs, L.backArm, L.torso, L.head]) overlay(c, frameOf(part, 0));
+    return c;
+  }
+
+  // 站立帧去掉后臂，并把 arm 画在躯干后面（后侧那只手做动作）
+  function idleWithBackArm(L, arm, dx = 0, dy = 0) {
+    const c = canvas(FW, FH);
+    overlay(c, frameOf(L.legs, 0));
+    if (arm) overlay(c, arm, dx, dy);
+    for (const part of [L.torso, L.front, L.head, L.front]) overlay(c, frameOf(part, 0));
     return c;
   }
 
@@ -350,17 +359,18 @@
     push(fullFrame(L, 5), tr("npcf.lJump", "空中"));
     for (let i = 0; i < walkCount; i++) push(fullFrame(L, 6 + i), tr("npcf.lWalk", "行走") + (i + 1));
 
-    // 手势 ×2：站立帧换成 1.4 身体的前臂姿势
+    // 偏移量按最终输出朝向填写（参考图以朝左的 NPC 贴图为准）；合成在朝右的模板空间进行，朝左输出时水平取反
+    const hx = (v) => (refs.faceLeft.checked ? -v : v);
+
+    // 手势 ×2：后侧那只手换成 1.4 身体的手臂姿势，画在躯干后面，前臂保持站立
     for (const sel of [refs.gestA, refs.gestB]) {
-      const c = idleWithoutFrontArm(L);
-      overlay(c, poseArm(L, parseInt(sel.value, 10)));
-      push(c, tr("npcf.lGesture", "手势"));
+      push(idleWithBackArm(L, poseArm(L, parseInt(sel.value, 10))), tr("npcf.lGesture", "手势"));
     }
 
-    // 坐下：头与躯干（含手臂）下移，腿部站立帧向右下移动
+    // 坐下：头与躯干（含手臂）下移，腿部站立帧单独平移
     {
       const c = canvas(FW, FH);
-      overlay(c, frameOf(L.legs, 0), intVal(refs.sitLegDx, 2), intVal(refs.sitLegDy, 1));
+      overlay(c, frameOf(L.legs, 0), hx(intVal(refs.sitLegDx, 1)), intVal(refs.sitLegDy, 0));
       const upper = canvas(FW, FH);
       for (const part of [L.backArm, L.torso, L.front, L.head, L.front]) overlay(upper, frameOf(part, 0));
       overlay(c, upper, 0, intVal(refs.sitBodyDy, 1));
@@ -371,18 +381,24 @@
     push(blinkFrame(idle), tr("npcf.lBlink", "眨眼"));
 
     // 攻击 ×4：1.4 身体挥动手臂四帧，默认画在身体下方并右移
-    const atkDx = intVal(refs.atkDx, 3);
+    const atkDx = hx(intVal(refs.atkDx, 3));
     const atkDy = intVal(refs.atkDy, 0);
-    // 换手：攻击时去掉站立帧原本的前臂，只保留挥动的手臂
-    const atkBase = refs.atkHideFront.checked ? idleWithoutFrontArm(L) : idle;
+    const hideSame = refs.atkHideFront.checked;
     for (let p = 0; p < 4; p++) {
-      const c = canvas(FW, FH);
       const arm = refs.atkSrc.value === "row1" ? attackArm(L, p) : poseArm(L, p);
+      let c;
       if (refs.atkUnder.checked) {
-        overlay(c, arm, atkDx, atkDy);
-        overlay(c, atkBase);
+        // 画在身体下方 = 后侧那只手挥动；勾选“换手”时去掉站立的后臂
+        if (hideSame) {
+          c = idleWithBackArm(L, arm, atkDx, atkDy);
+        } else {
+          c = canvas(FW, FH);
+          overlay(c, arm, atkDx, atkDy);
+          overlay(c, idle);
+        }
       } else {
-        overlay(c, atkBase);
+        c = canvas(FW, FH);
+        overlay(c, hideSame ? idleWithoutFrontArm(L) : idle);
         overlay(c, arm, atkDx, atkDy);
       }
       push(c, tr("npcf.lAttack", "攻击") + (p + 1));

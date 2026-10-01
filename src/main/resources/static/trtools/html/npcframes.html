@@ -107,20 +107,20 @@
                 <select id="npcGender"><option value="male" data-i18n="npcf.male">男体</option><option value="female" data-i18n="npcf.female">女体</option></select></label>
               <label><span data-i18n="npcf.layout">总帧数</span>
                 <select id="npcLayout"><option value="25" data-i18n="npcf.layout25">25 帧（行走 14 帧，同原版商人）</option><option value="23" data-i18n="npcf.layout23">23 帧（行走 12 帧，同原版护士）</option></select></label>
-              <label><span data-i18n="npcf.gestA">手势帧 1 的手臂</span><select id="npcGestA"></select></label>
-              <label><span data-i18n="npcf.gestB">手势帧 2 的手臂</span><select id="npcGestB"></select></label>
+              <label><span data-i18n="npcf.gestA">手势帧 1：后侧手臂</span><select id="npcGestA"></select></label>
+              <label><span data-i18n="npcf.gestB">手势帧 2：后侧手臂</span><select id="npcGestB"></select></label>
               <label><span data-i18n="npcf.sitBodyDy">坐下：头与躯干下移</span><input id="npcSitBodyDy" type="number" value="1" step="1" /></label>
-              <label><span data-i18n="npcf.sitLegDx">坐下：腿部右移</span><input id="npcSitLegDx" type="number" value="2" step="1" /></label>
-              <label><span data-i18n="npcf.sitLegDy">坐下：腿部下移</span><input id="npcSitLegDy" type="number" value="1" step="1" /></label>
+              <label><span data-i18n="npcf.sitLegDx">坐下：腿部右移</span><input id="npcSitLegDx" type="number" value="1" step="1" /></label>
+              <label><span data-i18n="npcf.sitLegDy">坐下：腿部下移</span><input id="npcSitLegDy" type="number" value="0" step="1" /></label>
               <label><span data-i18n="npcf.atkSrc">攻击：手臂来源</span>
                 <select id="npcAtkSrc"><option value="row0" data-i18n="npcf.atkSrc0">挥动手臂 (3,0)~(6,0)</option><option value="row1" data-i18n="npcf.atkSrc1">水平手臂 (3,1)~(6,1)</option></select></label>
               <label><span data-i18n="npcf.atkDx">攻击：手臂右移</span><input id="npcAtkDx" type="number" value="3" step="1" /></label>
               <label><span data-i18n="npcf.atkDy">攻击：手臂下移</span><input id="npcAtkDy" type="number" value="0" step="1" /></label>
-              <label class="npcfCheck"><input id="npcAtkHideFront" type="checkbox" /><span data-i18n="npcf.atkHideFront">攻击帧去掉站立时的前臂</span></label>
+              <label class="npcfCheck"><input id="npcAtkHideFront" type="checkbox" /><span data-i18n="npcf.atkHideFront">攻击帧去掉原本同侧的手臂（换手）</span></label>
               <label class="npcfCheck"><input id="npcAtkUnder" type="checkbox" checked /><span data-i18n="npcf.atkUnder">攻击手臂画在身体下方</span></label>
               <label class="npcfCheck"><input id="npcFaceLeft" type="checkbox" checked /><span data-i18n="npcf.faceLeft">输出朝左（原版城镇 NPC 贴图朝左）</span></label>
             </div>
-            <div class="hint" data-i18n="npcf.unitHint">偏移单位为模板像素（输出时放大 2 倍）；左右方向以模板中朝右的角色为准。</div>
+            <div class="hint" data-i18n="npcf.unitHint">偏移单位为模板像素（输出时放大 2 倍）；左右方向以最终输出的帧图为准。</div>
 
             <div class="sectionTitle" data-i18n="npcf.faceTitle">眼睛与嘴巴</div>
             <div class="hint" data-i18n="npcf.faceHint">点击像素切换标记。蓝色为眼睛：眨眼帧会取眼睛右侧的皮肤色向左覆盖，再画黑线。粉色为嘴巴：说话帧在这里画黑色像素。</div>
