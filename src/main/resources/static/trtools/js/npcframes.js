@@ -306,7 +306,7 @@
     return groups;
   }
 
-  // 眨眼：每只眼睛逐行取右侧一格的皮肤色向左覆盖（右侧不可用时取左侧），
+  // 眨眼：每只眼睛逐行取（输出朝向下）右侧一格的皮肤色覆盖（右侧不可用时取左侧），
   // 再只在这只眼睛最下面一行画黑线——两格高的眼睛闭上后是一格高的黑线
   function blinkFrame(base) {
     const c = canvas(FW, FH);
@@ -327,7 +327,10 @@
         rows.get(y).push(x);
       }
       for (const [y, xs] of rows) {
-        const skin = usable(Math.max(...xs) + 1, y) || usable(Math.min(...xs) - 1, y);
+        // “眼睛右侧”以最终输出朝向为准：朝左输出时对应模板里眼睛的左侧
+        const outRight = refs.faceLeft.checked ? usable(Math.min(...xs) - 1, y) : usable(Math.max(...xs) + 1, y);
+        const outLeft = refs.faceLeft.checked ? usable(Math.max(...xs) + 1, y) : usable(Math.min(...xs) - 1, y);
+        const skin = outRight || outLeft;
         if (!skin) continue;
         for (const x of xs) img.data.set(skin, (y * FW + x) * 4);
       }
