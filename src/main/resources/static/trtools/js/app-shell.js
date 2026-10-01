@@ -134,3 +134,71 @@
     boot();
   }
 })();
+
+// 全站通用：上传区域拖放文件 & 示例模板图保护
+(function () {
+  "use strict";
+
+  // 上传区域：.drop / .stRow / [data-twt-drop] 中只要有 input[type=file]，就支持把文件直接拖进来。
+  // 工具脚本若已自行处理 drop（会 preventDefault），这里不再重复处理。
+  var ZONE = ".drop, .stRow, [data-twt-drop]";
+
+  function zoneOf(target) {
+    var z = target && target.closest ? target.closest(ZONE) : null;
+    return z && z.querySelector('input[type="file"]') ? z : null;
+  }
+
+  function accepts(input, file) {
+    var acc = (input.getAttribute("accept") || "").trim();
+    if (!acc) return true;
+    var name = file.name.toLowerCase();
+    var type = (file.type || "").toLowerCase();
+    return acc.split(",").some(function (a) {
+      a = a.trim().toLowerCase();
+      if (!a) return false;
+      if (a.charAt(0) === ".") return name.endsWith(a);
+      if (a.slice(-2) === "/*") return type.indexOf(a.slice(0, -1)) === 0;
+      return type === a;
+    });
+  }
+
+  document.addEventListener("dragover", function (e) {
+    var z = zoneOf(e.target);
+    if (!z || e.defaultPrevented) return;
+    e.preventDefault();
+    z.classList.add("dragover");
+  });
+
+  document.addEventListener("dragleave", function (e) {
+    var z = zoneOf(e.target);
+    if (z && !z.contains(e.relatedTarget)) z.classList.remove("dragover");
+  });
+
+  document.addEventListener("drop", function (e) {
+    var z = zoneOf(e.target);
+    if (!z) return;
+    z.classList.remove("dragover");
+    if (e.defaultPrevented) return;
+    e.preventDefault();
+    var input = z.querySelector('input[type="file"]');
+    var files = Array.prototype.filter.call((e.dataTransfer && e.dataTransfer.files) || [], function (f) {
+      return accepts(input, f);
+    });
+    if (!files.length) return;
+    if (!input.multiple) files = files.slice(0, 1);
+    try {
+      var dt = new DataTransfer();
+      files.forEach(function (f) { dt.items.add(f); });
+      input.files = dt.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    } catch (_) {}
+  });
+
+  // 示例模板图：不提供右键/拖拽获取原图
+  document.addEventListener("contextmenu", function (e) {
+    if (e.target && e.target.closest && e.target.closest(".twtSample")) e.preventDefault();
+  });
+  document.addEventListener("dragstart", function (e) {
+    if (e.target && e.target.closest && e.target.closest(".twtSample")) e.preventDefault();
+  });
+})();

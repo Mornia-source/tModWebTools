@@ -460,3 +460,14 @@ textarea.textInput:focus {
 }
 .twtFriendBannerName{ font-weight:800; }
 .twtFriendBannerGo{ margin-left:auto; font-size:13px; opacity:.85; }
+
+/* 外链入口末尾的跳转图标 */
+.appNav .appNavLink.appNavLink--ext > .appNavExtIcon {
+  grid-column: 3;
+  grid-row: 1;
+  font-size: 11px;
+  opacity: 0.55;
+}
+.appNav .appNavLink.appNavLink--ext:hover > .appNavExtIcon {
+  opacity: 0.9;
+}

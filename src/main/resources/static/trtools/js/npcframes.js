@@ -38,6 +38,8 @@
     atkSrc: el("npcAtkSrc"), atkHideFront: el("npcAtkHideFront"),
     faceCanvas: el("npcFaceCanvas"), faceResetBtn: el("npcFaceReset"),
     editEyes: el("npcEditEyes"), editMouth: el("npcEditMouth"),
+    paintCanvas: el("npcPaintCanvas"), paintColor: el("npcPaintColor"),
+    paintPen: el("npcPaintPen"), paintRestore: el("npcPaintRestore"), paintClear: el("npcPaintClear"),
     strip: el("npcStrip"), stripHost: el("npcStripHost"),
     anim: el("npcAnim"), animSel: el("npcAnimSel"),
     download: el("npcDownload"), downloadStrip: el("npcDownloadStrip"),
@@ -50,6 +52,9 @@
     eyes: DEFAULT_EYES.map((p) => p.slice()),
     mouth: DEFAULT_MOUTH.map((p) => p.slice()),
     editTarget: "eyes",
+    blinkPaint: new Map(), // 闭眼帧手绘修改："x,y" -> rgba
+    paintTool: "pen",
+    blinkArt: null,        // 当前闭眼帧（美术像素，未翻转），供手绘编辑器显示与吸色
     frames: null,   // 最终 40×56 帧（已处理朝向）
     labels: null,
     sheet: null,
@@ -366,6 +371,9 @@
     }
     x2d.putImageData(img, 0, 0);
     applyPixels(c, black, () => [0, 0, 0, 255]);
+    // 手绘修改覆盖在自动结果之上
+    applyPixels(c, [...state.blinkPaint.keys()].map((k) => k.split(",").map(Number)), (_, x, y) => state.blinkPaint.get(`${x},${y}`));
+    state.blinkArt = c;
     return c;
   }
 
@@ -407,7 +415,7 @@
     push(blinkFrame(idle), tr("npcf.lBlink", "眨眼"));
 
     // 攻击 ×4：1.4 身体挥动手臂四帧，默认画在身体下方并右移
-    const atkDx = intVal(refs.atkDx, 3);
+    const atkDx = intVal(refs.atkDx, 6);
     const atkDy = intVal(refs.atkDy, 0);
     const hideSame = refs.atkHideFront.checked;
     for (let p = 0; p < 4; p++) {
@@ -450,6 +458,7 @@
     state.sheet = sheet;
 
     renderStrip();
+    drawPaintEditor();
     renderCode(frames.length);
     restartAnim();
     refs.download.disabled = false;
@@ -548,17 +557,39 @@
     mark(state.mouth, "#ff2fa6");
   }
 
-  function togglePixel(list, x, y) {
-    const i = list.findIndex(([a, b]) => a === x && b === y);
-    if (i >= 0) list.splice(i, 1);
-    else list.push([x, y]);
+  function indexOfPixel(list, x, y) {
+    return list.findIndex(([a, b]) => a === x && b === y);
   }
 
-  refs.faceCanvas.addEventListener("click", (e) => {
-    const r = refs.faceCanvas.getBoundingClientRect();
+  // 切换标记；眼睛与嘴巴互斥，标到一类时从另一类中移除
+  function togglePixel(list, other, x, y) {
+    const i = indexOfPixel(list, x, y);
+    if (i >= 0) {
+      list.splice(i, 1);
+      return;
+    }
+    const j = indexOfPixel(other, x, y);
+    if (j >= 0) other.splice(j, 1);
+    list.push([x, y]);
+  }
+
+  function canvasPixel(c, e) {
+    const r = c.getBoundingClientRect();
     const x = Math.floor(((e.clientX - r.left) / r.width) * FW);
     const y = Math.floor(((e.clientY - r.top) / r.height) * FH);
-    togglePixel(state.editTarget === "eyes" ? state.eyes : state.mouth, x, y);
+    return x >= 0 && y >= 0 && x < FW && y < FH ? [x, y] : null;
+  }
+
+  // 左键标记当前目标（默认眼睛），右键标记另一类（默认嘴巴）
+  refs.faceCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  refs.faceCanvas.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 && e.button !== 2) return;
+    e.preventDefault();
+    const p = canvasPixel(refs.faceCanvas, e);
+    if (!p) return;
+    const leftIsEyes = state.editTarget === "eyes";
+    const eyes = (e.button === 0) === leftIsEyes;
+    togglePixel(eyes ? state.eyes : state.mouth, eyes ? state.mouth : state.eyes, p[0], p[1]);
     drawFaceEditor();
     if (state.frames) generate();
   });
@@ -568,6 +599,86 @@
     refs.editEyes.classList.toggle("secondary", t !== "eyes");
     refs.editMouth.classList.toggle("secondary", t !== "mouth");
   }
+
+  // ---------- 闭眼帧手绘 ----------
+  function drawPaintEditor() {
+    const c = refs.paintCanvas;
+    c.width = FW * ZOOM;
+    c.height = FH * ZOOM;
+    const x = c.getContext("2d");
+    x.imageSmoothingEnabled = false;
+    x.clearRect(0, 0, c.width, c.height);
+    if (state.blinkArt) x.drawImage(state.blinkArt, 0, 0, c.width, c.height);
+    x.strokeStyle = "rgba(0,0,0,.12)";
+    for (let i = 0; i <= FW; i++) { x.beginPath(); x.moveTo(i * ZOOM + 0.5, 0); x.lineTo(i * ZOOM + 0.5, c.height); x.stroke(); }
+    for (let j = 0; j <= FH; j++) { x.beginPath(); x.moveTo(0, j * ZOOM + 0.5); x.lineTo(c.width, j * ZOOM + 0.5); x.stroke(); }
+    x.strokeStyle = "#ffb300";
+    x.lineWidth = 2;
+    for (const k of state.blinkPaint.keys()) {
+      const [px, py] = k.split(",").map(Number);
+      x.strokeRect(px * ZOOM + 1, py * ZOOM + 1, ZOOM - 2, ZOOM - 2);
+    }
+    x.lineWidth = 1;
+  }
+
+  function hexToRgba(hex) {
+    const v = parseInt(hex.slice(1), 16);
+    return [(v >> 16) & 255, (v >> 8) & 255, v & 255, 255];
+  }
+
+  function rgbToHex(p) {
+    return "#" + [p[0], p[1], p[2]].map((n) => n.toString(16).padStart(2, "0")).join("");
+  }
+
+  function setPaintTool(t) {
+    state.paintTool = t;
+    refs.paintPen.classList.toggle("secondary", t !== "pen");
+    refs.paintRestore.classList.toggle("secondary", t !== "restore");
+  }
+
+  function paintAt(e) {
+    const p = canvasPixel(refs.paintCanvas, e);
+    if (!p) return;
+    const key = p.join(",");
+    if (state.paintTool === "restore") {
+      if (!state.blinkPaint.delete(key)) return;
+    } else {
+      const col = hexToRgba(refs.paintColor.value);
+      const cur = state.blinkPaint.get(key);
+      if (cur && cur.every((v, i) => v === col[i])) return;
+      state.blinkPaint.set(key, col);
+    }
+    if (state.tpl) generate();
+    else drawPaintEditor();
+  }
+
+  refs.paintCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  refs.paintCanvas.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    if (e.button === 2) {
+      // 右键吸色
+      const p = canvasPixel(refs.paintCanvas, e);
+      if (p && state.blinkArt) {
+        const px = ctx2d(state.blinkArt).getImageData(p[0], p[1], 1, 1).data;
+        if (px[3] > 0) {
+          refs.paintColor.value = rgbToHex(px);
+          setPaintTool("pen");
+        }
+      }
+      return;
+    }
+    if (e.button === 0) paintAt(e);
+  });
+  refs.paintCanvas.addEventListener("mousemove", (e) => {
+    if (e.buttons & 1) paintAt(e);
+  });
+  refs.paintPen.addEventListener("click", () => setPaintTool("pen"));
+  refs.paintRestore.addEventListener("click", () => setPaintTool("restore"));
+  refs.paintClear.addEventListener("click", () => {
+    state.blinkPaint.clear();
+    if (state.tpl) generate();
+    else drawPaintEditor();
+  });
   refs.editEyes.addEventListener("click", () => setEditTarget("eyes"));
   refs.editMouth.addEventListener("click", () => setEditTarget("mouth"));
   refs.faceResetBtn.addEventListener("click", () => {
@@ -605,6 +716,7 @@
       return;
     }
     state.tpl = n;
+    state.blinkPaint.clear();
     refs.tplText.textContent = `${file.name}（${c.width}×${c.height}）`;
     drawFaceEditor();
     generate();
@@ -699,5 +811,7 @@
   });
 
   setEditTarget("eyes");
+  setPaintTool("pen");
   drawFaceEditor();
+  drawPaintEditor();
 })();

@@ -84,7 +84,7 @@
     a.innerHTML =
       '<i class="fas fa-book-open" aria-hidden="true"></i>' +
       '<span class="twtFriendBannerTag" data-i18n="nav.bannerTag">友站推荐</span>' +
-      '<span class="twtFriendBannerName" data-i18n="nav.friendLeaf">叶子的tMod泰拉模组教程</span>' +
+      '<span class="twtFriendBannerName" data-i18n="nav.friendLeaf">叶子的tMod模组教程</span>' +
       '<span class="twtFriendBannerGo"><span data-i18n="nav.bannerGo">前往查看</span> <i class="fas fa-external-link-alt" aria-hidden="true"></i></span>';
     top.parentNode.insertBefore(a, top.nextSibling);
   }

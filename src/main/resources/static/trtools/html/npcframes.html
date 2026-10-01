@@ -40,14 +40,19 @@
     .npcfOpts label{display:flex;flex-direction:column;gap:4px;font-size:12px;margin:0}
     .npcfOpts label.npcfCheck{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1}
     .npcfOpts select,.npcfOpts input[type=number]{width:100%;box-sizing:border-box}
-    .npcfDrop{position:relative;padding-right:150px}
-    .npcfSample{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-size:11px;color:var(--muted)}
-    .npcfSample img{display:block;width:128px;height:auto;image-rendering:pixelated;border:1px solid var(--line);border-radius:4px;background:#fff}
-    .npcfSample:hover img{outline:2px solid rgb(var(--twt-accent))}
-    @media (max-width:640px){.npcfDrop{padding-right:12px}.npcfSample{position:static;margin:0 auto 8px}}
     .npcfFaceHost{overflow:auto;max-width:100%}
     .npcfFace{width:280px;height:392px;image-rendering:pixelated;cursor:crosshair;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/14px 14px}
-    .npcfAnimRow{display:flex;align-items:flex-end;gap:16px;margin-bottom:12px}
+    .npcfTop{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin-bottom:14px}
+    .npcfPaintCol{flex:0 1 300px;min-width:0}
+    .npcfAnimCol{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+    .npcfSub{font-weight:700;font-size:13px;margin-bottom:6px}
+    .npcfPaintCol .hint{margin-bottom:10px}
+    .npcfToolRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+    .npcfToolRow input[type=color]{width:40px;height:34px;padding:2px;border:1px solid var(--line);border-radius:6px;background:transparent;cursor:pointer}
+    .npcfMarks{margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:6px}
+    .npcfMarks summary{cursor:pointer;font-weight:700;font-size:13px}
+    .npcfMarks[open] summary{margin-bottom:10px}
+    .npcfMarks .hint{margin:0 0 12px}
     .npcfAnim{width:120px;height:168px;image-rendering:pixelated;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/12px 12px}
     .npcfStripHost{overflow-x:auto}
     .npcfStrip{image-rendering:pixelated;max-width:none}
@@ -68,7 +73,7 @@
             <i class="fas fa-bars" aria-hidden="true"></i>
           </button>
           <div class="appTopBarMain">
-            <h1 class="appPageTitle"><span data-i18n="npcf.h1">NPC帧图生成器</span></h1>
+            <h1 class="appPageTitle"><img class="appPageIcon" src="/trtools/img/NpcFrames.png" alt="" width="18" height="18" style="image-rendering:pixelated" decoding="async" fetchpriority="low" /><span data-i18n="npcf.h1">NPC帧图生成器</span></h1>
             <div class="hint" style="margin-top:8px" data-i18n="npcf.intro">上传画好的装备帧模板（128×80）与 1.4 身体贴图（360×224），直接生成可用于城镇 NPC 的帧图：站立、空中、行走、手势、坐下、说话、眨眼、攻击（原版标准顺序）。</div>
           </div>
           <div class="appTopBarEnd">
@@ -84,11 +89,8 @@
           <section class="card panel">
             <div class="sectionTitle" data-i18n="npcf.inTitle">输入模板</div>
             <div class="filePicker">
-              <div class="drop npcfDrop" id="npcTplDrop">
-                <a class="npcfSample" href="/trtools/img/npcframes/sample-armor-template.png" target="_blank" rel="noopener" data-i18n-title="npcf.sampleTip" title="示例模板，点击查看原图">
-                  <img src="/trtools/img/npcframes/sample-armor-template.png" alt="" width="128" height="80" />
-                  <span data-i18n="npcf.sample">示例</span>
-                </a>
+              <div class="drop twtSampleHost" id="npcTplDrop">
+                <div class="twtSample" style="--twt-sample:url(/trtools/img/template-samples/sample-armor-template.png);--twt-sample-ratio:128/80" data-label="示例" data-i18n-title="common.sampleTip" title="需要上传的模板示例（悬停放大）"></div>
                 <div style="font-weight:800" data-i18n="npcf.tplMain">① 装备帧模板（128×80，必需）</div>
                 <div class="hint" data-i18n="npcf.tplHint">与“装备帧生成器”使用同一张模板：头、身体、腿、手臂。</div>
                 <input id="npcTplFile" class="hiddenFileInput" type="file" accept="image/png,image/bmp" />
@@ -99,11 +101,8 @@
               </div>
             </div>
             <div class="filePicker" style="margin-top:10px">
-              <div class="drop npcfDrop" id="npcBodyDrop">
-                <a class="npcfSample" href="/trtools/img/npcframes/sample-body14-template.png" target="_blank" rel="noopener" data-i18n-title="npcf.sampleTip" title="示例模板，点击查看原图">
-                  <img src="/trtools/img/npcframes/sample-body14-template.png" alt="" width="128" height="95" />
-                  <span data-i18n="npcf.sample">示例</span>
-                </a>
+              <div class="drop twtSampleHost" id="npcBodyDrop">
+                <div class="twtSample" style="--twt-sample:url(/trtools/img/template-samples/sample-body14-template.png);--twt-sample-ratio:480/356" data-label="示例" data-i18n-title="common.sampleTip" title="需要上传的模板示例（悬停放大）"></div>
                 <div style="font-weight:800" data-i18n="npcf.bodyMain">② 1.4 身体贴图（360×224）</div>
                 <div class="hint" data-i18n="npcf.bodyHint">提供手势帧与攻击帧的手臂（第 0 行 (3,0)~(6,0)，或第 1 行 (3,1)~(6,1)）。未上传时改用模板①里的手臂。</div>
                 <input id="npcBodyFile" class="hiddenFileInput" type="file" accept="image/png,image/bmp" />
@@ -127,7 +126,7 @@
               <label><span data-i18n="npcf.sitLegDy">坐下：腿部下移</span><input id="npcSitLegDy" type="number" value="0" step="1" /></label>
               <label><span data-i18n="npcf.atkSrc">攻击：手臂来源</span>
                 <select id="npcAtkSrc"><option value="row0" data-i18n="npcf.atkSrc0">挥动手臂 (3,0)~(6,0)</option><option value="row1" data-i18n="npcf.atkSrc1">水平手臂 (3,1)~(6,1)</option></select></label>
-              <label><span data-i18n="npcf.atkDx">攻击：手臂右移</span><input id="npcAtkDx" type="number" value="3" step="1" /></label>
+              <label><span data-i18n="npcf.atkDx">攻击：手臂右移</span><input id="npcAtkDx" type="number" value="6" step="1" /></label>
               <label><span data-i18n="npcf.atkDy">攻击：手臂下移</span><input id="npcAtkDy" type="number" value="0" step="1" /></label>
               <label class="npcfCheck"><input id="npcAtkHideFront" type="checkbox" /><span data-i18n="npcf.atkHideFront">攻击帧去掉原本同侧的手臂（换手）</span></label>
               <label class="npcfCheck"><input id="npcAtkUnder" type="checkbox" checked /><span data-i18n="npcf.atkUnder">攻击手臂画在身体下方</span></label>
@@ -135,30 +134,46 @@
             </div>
             <div class="hint" data-i18n="npcf.unitHint">偏移单位为模板像素（输出时放大 2 倍）；左右方向以输出的帧图（默认朝右）为准。</div>
 
-            <div class="sectionTitle" data-i18n="npcf.faceTitle">眼睛与嘴巴</div>
-            <div class="hint" data-i18n="npcf.faceHint">点击像素切换标记。蓝色为眼睛：眨眼帧会取眼睛右侧的皮肤色向左覆盖，再画黑线。粉色为嘴巴：说话帧在这里画黑色像素。</div>
-            <div class="toolbar">
-              <button id="npcEditEyes" class="btn" type="button"><span data-i18n="npcf.editEyes">标记眼睛</span></button>
-              <button id="npcEditMouth" class="btn secondary" type="button"><span data-i18n="npcf.editMouth">标记嘴巴</span></button>
-              <button id="npcFaceReset" class="btn secondary" type="button"><span data-i18n="npcf.faceReset">恢复默认</span></button>
-            </div>
-            <div class="npcfFaceHost"><canvas id="npcFaceCanvas" class="npcfFace"></canvas></div>
-
             <div id="npcStatus" class="status"></div>
           </section>
 
           <section class="card panel">
             <div class="sectionTitle" data-i18n="npcf.previewTitle">预览</div>
-            <div class="npcfAnimRow">
-              <canvas id="npcAnim" class="npcfAnim" width="120" height="168"></canvas>
-              <label><span data-i18n="npcf.anim">动画</span>
+            <div class="npcfTop">
+              <div class="npcfPaintCol">
+                <div class="npcfSub" data-i18n="npcf.paintTitle">闭眼帧（眨眼）手绘调整</div>
+                <div class="hint" data-i18n="npcf.paintHint">左键用当前颜色绘制，右键吸取颜色，按住可连续绘制。“还原像素”可把单个像素恢复为自动生成的颜色。</div>
+                <div class="npcfToolRow">
+                  <input type="color" id="npcPaintColor" value="#000000" data-i18n-title="npcf.paintColor" title="当前颜色" />
+                  <button id="npcPaintPen" class="btn" type="button"><i class="fas fa-paint-brush" style="margin-right:6px"></i><span data-i18n="npcf.paintPen">画笔</span></button>
+                  <button id="npcPaintRestore" class="btn secondary" type="button"><i class="fas fa-undo" style="margin-right:6px"></i><span data-i18n="npcf.paintRestore">还原像素</span></button>
+                  <button id="npcPaintClear" class="btn secondary" type="button"><span data-i18n="npcf.paintClear">清除全部修改</span></button>
+                </div>
+                <div class="npcfFaceHost"><canvas id="npcPaintCanvas" class="npcfFace"></canvas></div>
+              </div>
+              <div class="npcfAnimCol">
+                <div class="npcfSub" data-i18n="npcf.anim">动画</div>
+                <canvas id="npcAnim" class="npcfAnim" width="120" height="168"></canvas>
                 <select id="npcAnimSel">
                   <option value="walk" data-i18n="npcf.animWalk">行走</option>
                   <option value="attack" data-i18n="npcf.animAttack">攻击</option>
                   <option value="talk" data-i18n="npcf.animTalk">说话 / 眨眼 / 手势</option>
                   <option value="sit" data-i18n="npcf.animSit">坐下</option>
-                </select></label>
+                </select>
+              </div>
             </div>
+
+            <details class="npcfMarks">
+              <summary data-i18n="npcf.faceTitle">自动标记眼睛 / 嘴巴</summary>
+              <div class="hint" data-i18n="npcf.faceHint">左键标记眼睛（蓝色），右键标记嘴巴（粉色）；用按钮切换后左右键对调。同一像素只能是眼睛或嘴巴之一。闭眼帧会取眼睛旁的皮肤色覆盖并画黑线，说话帧在嘴巴处画黑色像素。</div>
+              <div class="npcfToolRow">
+                <button id="npcEditEyes" class="btn" type="button"><span data-i18n="npcf.editEyes">左键：眼睛</span></button>
+                <button id="npcEditMouth" class="btn secondary" type="button"><span data-i18n="npcf.editMouth">左键：嘴巴</span></button>
+                <button id="npcFaceReset" class="btn secondary" type="button"><span data-i18n="npcf.faceReset">恢复默认</span></button>
+              </div>
+              <div class="npcfFaceHost"><canvas id="npcFaceCanvas" class="npcfFace"></canvas></div>
+            </details>
+
             <div class="sectionTitle" data-i18n="npcf.stripTitle">全部帧（横向预览）</div>
             <div class="materialPreviewFrame previewFrame previewFrame--empty npcfStripHost" id="npcStripHost">
               <canvas id="npcStrip" class="npcfStrip" width="0" height="0"></canvas>
