@@ -8,7 +8,8 @@
     (function () {
       try {
         var lang = localStorage.getItem("trtools.lang") || "zh-CN";
-        var theme = localStorage.getItem("trtools.theme") || "emerald";
+        var theme = localStorage.getItem("trtools.theme");
+        if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
         var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
         var TBOOT = {
           "meta.titleHome": { zh: "tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry", en: "tModWebTools — Respecting every developer's wishes — Mornia-Cherry", es: "tModWebTools — Respetando los deseos de cada desarrollador — Mornia-Cherry" },
@@ -42,9 +43,13 @@
     .npcfOpts select,.npcfOpts input[type=number]{width:100%;box-sizing:border-box}
     .npcfFaceHost{overflow:auto;max-width:100%}
     .npcfFace{width:280px;height:392px;image-rendering:pixelated;cursor:crosshair;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/14px 14px}
-    .npcfTop{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin-bottom:14px}
-    .npcfPaintCol{flex:0 1 300px;min-width:0}
-    .npcfAnimCol{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+    .npcfTop{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch;margin-bottom:14px}
+    .npcfPaintCol,.npcfAnimCol{border:1px solid var(--line);border-radius:8px;padding:12px;box-sizing:border-box}
+    .npcfPaintCol{flex:0 1 326px;min-width:0}
+    .npcfAnimCol{flex:1 1 200px;display:flex;flex-direction:column;gap:12px;align-items:center}
+    .npcfAnimCol .npcfSub{align-self:stretch}
+    .npcfAnimStage{flex:1;display:flex;align-items:center;justify-content:center}
+    .npcfAnimCol select{width:100%;max-width:200px}
     .npcfSub{font-weight:700;font-size:13px;margin-bottom:6px}
     .npcfPaintCol .hint{margin-bottom:10px}
     .npcfToolRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
@@ -53,7 +58,7 @@
     .npcfMarks summary{cursor:pointer;font-weight:700;font-size:13px}
     .npcfMarks[open] summary{margin-bottom:10px}
     .npcfMarks .hint{margin:0 0 12px}
-    .npcfAnim{width:120px;height:168px;image-rendering:pixelated;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/12px 12px}
+    .npcfAnim{width:160px;height:224px;image-rendering:pixelated;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/12px 12px}
     .npcfStripHost{overflow-x:auto}
     .npcfStrip{image-rendering:pixelated;max-width:none}
     .npcfCode{width:100%;font-family:Consolas,monospace;font-size:12px;box-sizing:border-box}
@@ -154,7 +159,7 @@
               </div>
               <div class="npcfAnimCol">
                 <div class="npcfSub" data-i18n="npcf.anim">动画</div>
-                <canvas id="npcAnim" class="npcfAnim" width="120" height="168"></canvas>
+                <div class="npcfAnimStage"><canvas id="npcAnim" class="npcfAnim" width="160" height="224"></canvas></div>
                 <select id="npcAnimSel">
                   <option value="walk" data-i18n="npcf.animWalk">行走</option>
                   <option value="attack" data-i18n="npcf.animAttack">攻击</option>

@@ -1,10 +1,16 @@
 // tModWebTools 站点文案：localStorage trtools.lang = zh-CN | en | es（西语词条见 i18n-es.js，先于本文件加载）
-// 主题：trtools.theme = emerald|ocean|violet|amber|rose|teal（由设置页写入，head 内联脚本抢先读）
+// 主题：trtools.theme = national|emerald|ocean|violet|amber|rose|teal（由设置页写入，head 内联脚本抢先读）
+// 默认主题（DEFAULT_THEME）临时为“国庆”。只有在设置页手动选择过（trtools.themeChosen=1）才使用存储值；
+// 旧版本会把 emerald 自动写入存储，因此“存的是 emerald 但没有手动选择标记”也视为未选择。
+// 节日结束后把 DEFAULT_THEME 与各页 head 内联脚本中的 "national" 改回 "emerald" 即可。
 (function () {
   "use strict";
 
   var LANG_KEY = "trtools.lang";
   var THEME_KEY = "trtools.theme";
+  var THEME_CHOSEN_KEY = "trtools.themeChosen";
+  var DEFAULT_THEME = "national";
+  var THEME_RE = /^(national|emerald|ocean|violet|amber|rose|teal)$/;
 
   var ZH = {
     "loading.text": "加载中…",
@@ -163,6 +169,7 @@
     "settings.langEn": "English",
     "settings.langEs": "Español",
     "settings.themeTitle": "主题色",
+    "settings.themeNational": "国庆",
     "settings.themeEmerald": "翠绿",
     "settings.themeOcean": "海蓝",
     "settings.themeViolet": "紫罗兰",
@@ -682,6 +689,7 @@
     "settings.langEn": "English",
     "settings.langEs": "Español",
     "settings.themeTitle": "Theme color",
+    "settings.themeNational": "National Day",
     "settings.themeEmerald": "Emerald",
     "settings.themeOcean": "Ocean",
     "settings.themeViolet": "Violet",
@@ -1078,11 +1086,12 @@
 
   function getTheme() {
     try {
-      var v = localStorage.getItem(THEME_KEY) || "emerald";
-      if (/^(emerald|ocean|violet|amber|rose|teal)$/.test(v)) return v;
-      return "emerald";
+      var v = localStorage.getItem(THEME_KEY);
+      var chosen = localStorage.getItem(THEME_CHOSEN_KEY) === "1";
+      if (!chosen && (!v || v === "emerald")) return DEFAULT_THEME;
+      return THEME_RE.test(v) ? v : DEFAULT_THEME;
     } catch (_) {
-      return "emerald";
+      return DEFAULT_THEME;
     }
   }
 
@@ -1163,16 +1172,19 @@
     apply(document);
   }
 
+  // 设置页手动选择主题：写入存储并记下“手动选择”标记
   function setTheme(name) {
-    var th = /^(emerald|ocean|violet|amber|rose|teal)$/.test(name) ? name : "emerald";
+    var th = THEME_RE.test(name) ? name : DEFAULT_THEME;
     try {
       localStorage.setItem(THEME_KEY, th);
+      localStorage.setItem(THEME_CHOSEN_KEY, "1");
     } catch (_) {}
     document.documentElement.setAttribute("data-trtheme", th);
   }
 
   function init() {
-    setTheme(getTheme());
+    // 只应用、不写回存储，避免把默认主题固化成用户选择
+    document.documentElement.setAttribute("data-trtheme", getTheme());
     apply(document);
   }
 

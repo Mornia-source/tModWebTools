@@ -44,3 +44,105 @@ html[data-trtheme="teal"] {
   --twt-surface-b: 240, 253, 250;
   --twt-surface-c: 236, 253, 245;
 }
+
+/* ===================== 国庆主题（临时默认） =====================
+ * 不只是换色：暖色星纹背景、顶栏红金饰条与“国庆快乐”挂签、金色星标、金色高亮条等。
+ */
+html[data-trtheme="national"] {
+  --twt-accent: 214, 40, 40;
+  --twt-accent-deep: 168, 22, 22;
+  --twt-surface-a: 255, 226, 214;
+  --twt-surface-b: 255, 247, 237;
+  --twt-surface-c: 255, 243, 230;
+  --twt-gold: 240, 185, 30;
+  --shell-bg: #fbf3ea;
+}
+
+/* 背景：暖色渐变 + 淡金五角星纹样 */
+html[data-trtheme="national"] .appMain {
+  background-color: #fbf3ea;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23e0a91a' fill-opacity='0.13'%3E%3Cpath d='M20 8l3.5 10.8H35l-9.2 6.7 3.5 10.8L20 29.6l-9.3 6.7 3.5-10.8L5 18.8h11.5z'/%3E%3Cpath d='M86 64l2.3 7h7.4l-6 4.3 2.3 7-6-4.3-6 4.3 2.3-7-6-4.3h7.4z'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(180deg, rgba(214, 40, 40, 0.07) 0%, rgba(240, 185, 30, 0.05) 30%, transparent 70%);
+  background-repeat: repeat, no-repeat;
+}
+
+/* 侧边栏：顶部红金饰线、品牌前金星、当前项金色高亮条 */
+html[data-trtheme="national"] .appSidebar {
+  background: linear-gradient(180deg, #fff6ec 0%, #fbf3ea 100%);
+  box-shadow: inset 0 3px 0 rgb(var(--twt-accent));
+}
+html[data-trtheme="national"] .appSidebarBrand::before {
+  content: "★";
+  margin-right: 6px;
+  color: rgb(var(--twt-gold));
+  text-shadow: 0 0 1px rgba(168, 22, 22, 0.6);
+}
+html[data-trtheme="national"] .appNav .appNavLink.pageTab.active {
+  box-shadow: inset 3px 0 0 rgb(var(--twt-gold));
+  border-color: rgba(var(--twt-gold), 0.7);
+}
+
+/* 顶栏：顶边红金渐变饰条 + 中间悬挂的“国庆快乐”挂签 */
+html[data-trtheme="national"] .appTopBar {
+  position: relative;
+  padding-top: 22px;
+  border-color: rgba(var(--twt-gold), 0.55);
+}
+html[data-trtheme="national"] .appTopBar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: linear-gradient(90deg, rgb(var(--twt-accent)) 0%, rgb(var(--twt-gold)) 50%, rgb(var(--twt-accent)) 100%);
+}
+html[data-trtheme="national"] .appTopBar::after {
+  content: "★ 国庆快乐 ★";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 12px 2px;
+  border-radius: 0 0 8px 8px;
+  background: rgb(var(--twt-accent));
+  color: rgb(255, 222, 120);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+html[data-trtheme="national"]:lang(en) .appTopBar::after { content: "★ Happy National Day ★"; letter-spacing: 0; }
+html[data-trtheme="national"]:lang(es) .appTopBar::after { content: "★ Feliz Día Nacional ★"; letter-spacing: 0; }
+
+/* 卡片与标题：标题前金星，按钮悬停描金边 */
+html[data-trtheme="national"] .card {
+  border-color: rgba(var(--twt-gold), 0.35);
+}
+html[data-trtheme="national"] .sectionTitle::before {
+  content: "★";
+  margin-right: 5px;
+  font-size: 11px;
+  color: rgb(var(--twt-gold));
+}
+html[data-trtheme="national"] .btn:hover:not(:disabled) {
+  border-color: rgba(var(--twt-gold), 0.9);
+  box-shadow: 0 0 0 1px rgba(var(--twt-gold), 0.35);
+}
+
+/* 设置页色块 */
+.settingsSwatch--national {
+  background: linear-gradient(135deg, #d62828 0 62%, #f0b91e 62% 100%);
+  position: relative;
+}
+.settingsSwatch--national::after {
+  content: "★";
+  position: absolute;
+  left: 22%;
+  top: 14%;
+  font-size: 12px;
+  line-height: 1;
+  color: #ffde78;
+}

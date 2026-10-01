@@ -88,6 +88,7 @@ window.__TWT_ES = {
   "settings.langEn": "English",
   "settings.langEs": "Español",
   "settings.themeTitle": "Color del tema",
+  "settings.themeNational": "Día Nacional",
   "settings.themeEmerald": "Esmeralda",
   "settings.themeOcean": "Océano",
   "settings.themeViolet": "Violeta",

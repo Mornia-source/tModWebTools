@@ -8,7 +8,8 @@
     (function () {
       try {
         var lang = localStorage.getItem("trtools.lang") || "zh-CN";
-        var theme = localStorage.getItem("trtools.theme") || "emerald";
+        var theme = localStorage.getItem("trtools.theme");
+        if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
         var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
         var TBOOT = {
           "meta.titleXnbCompiler": { zh: "XNB 编译器 — tModWebTools", en: "XNB Compiler — tModWebTools", es: "Compilador XNB — tModWebTools" }

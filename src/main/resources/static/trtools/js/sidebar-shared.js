@@ -15,7 +15,8 @@
 
   function ensureTheme() {
     try {
-      var theme = localStorage.getItem("trtools.theme") || "emerald";
+      var theme = localStorage.getItem("trtools.theme");
+      if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
       document.documentElement.setAttribute("data-trtheme", theme);
     } catch (_) {}
   }
