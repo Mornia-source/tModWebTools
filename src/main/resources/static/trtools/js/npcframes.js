@@ -34,7 +34,8 @@
     gender: el("npcGender"), layout: el("npcLayout"), faceLeft: el("npcFaceLeft"),
     gestA: el("npcGestA"), gestB: el("npcGestB"),
     sitBodyDy: el("npcSitBodyDy"), sitLegDx: el("npcSitLegDx"), sitLegDy: el("npcSitLegDy"),
-    atkDx: el("npcAtkDx"), atkUnder: el("npcAtkUnder"),
+    atkDx: el("npcAtkDx"), atkDy: el("npcAtkDy"), atkUnder: el("npcAtkUnder"),
+    atkSrc: el("npcAtkSrc"), atkHideFront: el("npcAtkHideFront"),
     faceCanvas: el("npcFaceCanvas"), faceResetBtn: el("npcFaceReset"),
     editEyes: el("npcEditEyes"), editMouth: el("npcEditMouth"),
     strip: el("npcStrip"), stripHost: el("npcStripHost"),
@@ -230,6 +231,11 @@
     return state.body ? armFromBody14(p.cell, 0) : frameOf(L.front, p.playerFrame);
   }
 
+  // 攻击挥手：1.4 身体第 1 行 (3,1)~(6,1) 的四段水平手臂；无 1.4 贴图时退回模板的后臂
+  function attackArm(L, i) {
+    return state.body ? armFromBody14(3 + i, 1) : frameOf(L.backArm, i);
+  }
+
   function intVal(input, def) {
     const v = parseInt(input.value, 10);
     return Number.isFinite(v) ? v : def;
@@ -264,30 +270,64 @@
     return c;
   }
 
-  // 眨眼：每行取眼睛右侧一格的皮肤色向左覆盖，再在每列最下方的眼睛像素画黑线
+  // 把标记的眼睛像素按 8 连通拆成一只只眼睛
+  function eyeGroups() {
+    const left = new Set(state.eyes.map(([x, y]) => `${x},${y}`));
+    const groups = [];
+    for (const [sx, sy] of state.eyes) {
+      if (!left.has(`${sx},${sy}`)) continue;
+      const g = [];
+      const stack = [[sx, sy]];
+      left.delete(`${sx},${sy}`);
+      while (stack.length) {
+        const [x, y] = stack.pop();
+        g.push([x, y]);
+        for (let dx = -1; dx <= 1; dx++) {
+          for (let dy = -1; dy <= 1; dy++) {
+            const k = `${x + dx},${y + dy}`;
+            if (left.has(k)) {
+              left.delete(k);
+              stack.push([x + dx, y + dy]);
+            }
+          }
+        }
+      }
+      groups.push(g);
+    }
+    return groups;
+  }
+
+  // 眨眼：每只眼睛逐行取右侧一格的皮肤色向左覆盖（右侧不可用时取左侧），
+  // 再只在这只眼睛最下面一行画黑线——两格高的眼睛闭上后是一格高的黑线
   function blinkFrame(base) {
     const c = canvas(FW, FH);
     overlay(c, base);
-    const rows = new Map();
-    for (const [x, y] of state.eyes) {
-      if (!rows.has(y)) rows.set(y, []);
-      rows.get(y).push(x);
-    }
     const x2d = ctx2d(c);
     const img = x2d.getImageData(0, 0, FW, FH);
-    for (const [y, xs] of rows) {
-      const right = Math.max(...xs) + 1;
-      const skin = right < FW ? pixelAt(img, right, y) : null;
-      if (!skin || skin[3] === 0) continue;
-      for (const x of xs) {
-        const i = (y * FW + x) * 4;
-        img.data.set(skin, i);
+    const marked = new Set(state.eyes.map(([x, y]) => `${x},${y}`));
+    const usable = (x, y) => {
+      if (x < 0 || x >= FW || y < 0 || y >= FH || marked.has(`${x},${y}`)) return null;
+      const p = pixelAt(img, x, y);
+      return p[3] > 0 ? p : null;
+    };
+    const black = [];
+    for (const g of eyeGroups()) {
+      const rows = new Map();
+      for (const [x, y] of g) {
+        if (!rows.has(y)) rows.set(y, []);
+        rows.get(y).push(x);
       }
+      for (const [y, xs] of rows) {
+        const skin = usable(Math.max(...xs) + 1, y) || usable(Math.min(...xs) - 1, y);
+        if (!skin) continue;
+        for (const x of xs) img.data.set(skin, (y * FW + x) * 4);
+      }
+      const bottom = Math.max(...g.map(([, y]) => y));
+      const xs = g.map(([x]) => x);
+      for (let x = Math.min(...xs); x <= Math.max(...xs); x++) black.push([x, bottom]);
     }
     x2d.putImageData(img, 0, 0);
-    const bottomByCol = new Map();
-    for (const [x, y] of state.eyes) bottomByCol.set(x, Math.max(bottomByCol.get(x) ?? -1, y));
-    applyPixels(c, [...bottomByCol].map(([x, y]) => [x, y]), () => [0, 0, 0, 255]);
+    applyPixels(c, black, () => [0, 0, 0, 255]);
     return c;
   }
 
@@ -320,7 +360,7 @@
     // 坐下：头与躯干（含手臂）下移，腿部站立帧向右下移动
     {
       const c = canvas(FW, FH);
-      overlay(c, frameOf(L.legs, 0), intVal(refs.sitLegDx, 2), intVal(refs.sitLegDy, 2));
+      overlay(c, frameOf(L.legs, 0), intVal(refs.sitLegDx, 2), intVal(refs.sitLegDy, 1));
       const upper = canvas(FW, FH);
       for (const part of [L.backArm, L.torso, L.front, L.head, L.front]) overlay(upper, frameOf(part, 0));
       overlay(c, upper, 0, intVal(refs.sitBodyDy, 1));
@@ -332,15 +372,18 @@
 
     // 攻击 ×4：1.4 身体挥动手臂四帧，默认画在身体下方并右移
     const atkDx = intVal(refs.atkDx, 3);
+    const atkDy = intVal(refs.atkDy, 0);
+    // 换手：攻击时去掉站立帧原本的前臂，只保留挥动的手臂
+    const atkBase = refs.atkHideFront.checked ? idleWithoutFrontArm(L) : idle;
     for (let p = 0; p < 4; p++) {
       const c = canvas(FW, FH);
-      const arm = poseArm(L, p);
+      const arm = refs.atkSrc.value === "row1" ? attackArm(L, p) : poseArm(L, p);
       if (refs.atkUnder.checked) {
-        overlay(c, arm, atkDx, 0);
-        overlay(c, idle);
+        overlay(c, arm, atkDx, atkDy);
+        overlay(c, atkBase);
       } else {
-        overlay(c, idle);
-        overlay(c, arm, atkDx, 0);
+        overlay(c, atkBase);
+        overlay(c, arm, atkDx, atkDy);
       }
       push(c, tr("npcf.lAttack", "攻击") + (p + 1));
     }
@@ -570,7 +613,7 @@
   fillPoseSelect(refs.gestA, 3);
   fillPoseSelect(refs.gestB, 2);
 
-  [refs.gender, refs.layout, refs.faceLeft, refs.gestA, refs.gestB, refs.sitBodyDy, refs.sitLegDx, refs.sitLegDy, refs.atkDx, refs.atkUnder]
+  [refs.gender, refs.layout, refs.faceLeft, refs.gestA, refs.gestB, refs.sitBodyDy, refs.sitLegDx, refs.sitLegDy, refs.atkDx, refs.atkDy, refs.atkUnder, refs.atkSrc, refs.atkHideFront]
     .forEach((inp) => inp.addEventListener("change", () => {
       if (inp === refs.gender) drawFaceEditor();
       if (state.tpl) generate();

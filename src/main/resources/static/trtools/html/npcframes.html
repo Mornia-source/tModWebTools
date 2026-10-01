@@ -92,7 +92,7 @@
             <div class="filePicker" style="margin-top:10px">
               <div class="drop" id="npcBodyDrop">
                 <div style="font-weight:800" data-i18n="npcf.bodyMain">② 1.4 身体贴图（360×224）</div>
-                <div class="hint" data-i18n="npcf.bodyHint">提供手势帧与攻击帧的手臂（第 0 行 (3,0)~(6,0)）。未上传时改用模板①里的手臂。</div>
+                <div class="hint" data-i18n="npcf.bodyHint">提供手势帧与攻击帧的手臂（第 0 行 (3,0)~(6,0)，或第 1 行 (3,1)~(6,1)）。未上传时改用模板①里的手臂。</div>
                 <input id="npcBodyFile" class="hiddenFileInput" type="file" accept="image/png,image/bmp" />
                 <div class="row">
                   <button id="npcBodyPick" class="btn" type="button"><i class="fas fa-image" style="margin-right:8px"></i><span data-i18n="npcf.pick">选择图片</span></button>
@@ -111,8 +111,12 @@
               <label><span data-i18n="npcf.gestB">手势帧 2 的手臂</span><select id="npcGestB"></select></label>
               <label><span data-i18n="npcf.sitBodyDy">坐下：头与躯干下移</span><input id="npcSitBodyDy" type="number" value="1" step="1" /></label>
               <label><span data-i18n="npcf.sitLegDx">坐下：腿部右移</span><input id="npcSitLegDx" type="number" value="2" step="1" /></label>
-              <label><span data-i18n="npcf.sitLegDy">坐下：腿部下移</span><input id="npcSitLegDy" type="number" value="2" step="1" /></label>
+              <label><span data-i18n="npcf.sitLegDy">坐下：腿部下移</span><input id="npcSitLegDy" type="number" value="1" step="1" /></label>
+              <label><span data-i18n="npcf.atkSrc">攻击：手臂来源</span>
+                <select id="npcAtkSrc"><option value="row0" data-i18n="npcf.atkSrc0">挥动手臂 (3,0)~(6,0)</option><option value="row1" data-i18n="npcf.atkSrc1">水平手臂 (3,1)~(6,1)</option></select></label>
               <label><span data-i18n="npcf.atkDx">攻击：手臂右移</span><input id="npcAtkDx" type="number" value="3" step="1" /></label>
+              <label><span data-i18n="npcf.atkDy">攻击：手臂下移</span><input id="npcAtkDy" type="number" value="0" step="1" /></label>
+              <label class="npcfCheck"><input id="npcAtkHideFront" type="checkbox" /><span data-i18n="npcf.atkHideFront">攻击帧去掉站立时的前臂</span></label>
               <label class="npcfCheck"><input id="npcAtkUnder" type="checkbox" checked /><span data-i18n="npcf.atkUnder">攻击手臂画在身体下方</span></label>
               <label class="npcfCheck"><input id="npcFaceLeft" type="checkbox" checked /><span data-i18n="npcf.faceLeft">输出朝左（原版城镇 NPC 贴图朝左）</span></label>
             </div>
