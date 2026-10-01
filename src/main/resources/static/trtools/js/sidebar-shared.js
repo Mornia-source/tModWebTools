@@ -17,6 +17,7 @@
     try {
       var theme = localStorage.getItem("trtools.theme");
       if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
+      theme = "national"; // FORCE_THEME：国庆期间强制，节后删除此行
       document.documentElement.setAttribute("data-trtheme", theme);
     } catch (_) {}
   }

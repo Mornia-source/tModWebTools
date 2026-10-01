@@ -11,6 +11,8 @@
   var THEME_CHOSEN_KEY = "trtools.themeChosen";
   var DEFAULT_THEME = "national";
   var THEME_RE = /^(national|emerald|ocean|violet|amber|rose|teal)$/;
+  // 节日期间强制使用的主题（为空则不强制）。节后改为 "" 并删除各页 head 与 sidebar-shared.js 中标注 FORCE_THEME 的行
+  var FORCE_THEME = "national";
 
   var ZH = {
     "loading.text": "加载中…",
@@ -170,6 +172,7 @@
     "settings.langEs": "Español",
     "settings.themeTitle": "主题色",
     "settings.themeNational": "国庆",
+    "settings.themeForced": "国庆期间全站统一使用国庆主题；在这里选择的主题会保存，节后自动生效。",
     "settings.themeEmerald": "翠绿",
     "settings.themeOcean": "海蓝",
     "settings.themeViolet": "紫罗兰",
@@ -690,6 +693,7 @@
     "settings.langEs": "Español",
     "settings.themeTitle": "Theme color",
     "settings.themeNational": "National Day",
+    "settings.themeForced": "During the National Day holiday the site uses the National Day theme; the theme you pick here is saved and applies afterwards.",
     "settings.themeEmerald": "Emerald",
     "settings.themeOcean": "Ocean",
     "settings.themeViolet": "Violet",
@@ -1084,7 +1088,8 @@
     }
   }
 
-  function getTheme() {
+  // 用户自己选择（或默认）的主题，不受强制影响；设置页用它显示选中状态
+  function getChosenTheme() {
     try {
       var v = localStorage.getItem(THEME_KEY);
       var chosen = localStorage.getItem(THEME_CHOSEN_KEY) === "1";
@@ -1172,14 +1177,19 @@
     apply(document);
   }
 
-  // 设置页手动选择主题：写入存储并记下“手动选择”标记
+  // 实际显示的主题：节日期间强制
+  function getTheme() {
+    return FORCE_THEME || getChosenTheme();
+  }
+
+  // 设置页手动选择主题：写入存储并记下“手动选择”标记（强制期间保存选择，节后生效）
   function setTheme(name) {
     var th = THEME_RE.test(name) ? name : DEFAULT_THEME;
     try {
       localStorage.setItem(THEME_KEY, th);
       localStorage.setItem(THEME_CHOSEN_KEY, "1");
     } catch (_) {}
-    document.documentElement.setAttribute("data-trtheme", th);
+    document.documentElement.setAttribute("data-trtheme", getTheme());
   }
 
   function init() {
@@ -1193,6 +1203,8 @@
     THEME_KEY: THEME_KEY,
     getLang: getLang,
     getTheme: getTheme,
+    getChosenTheme: getChosenTheme,
+    forcedTheme: FORCE_THEME,
     t: t,
     apply: apply,
     setLang: setLang,

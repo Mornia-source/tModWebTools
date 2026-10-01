@@ -1,0 +1,15 @@
+[
+  {"key": "tilesheet", "page": "index"},
+  {"key": "effecteditor", "page": "effecteditor"},
+  {"key": "armorhelper", "page": "armorhelper"},
+  {"key": "npcframes", "page": "npcframes"},
+  {"key": "spritetransform", "page": "spritetransform"},
+  {"key": "tool14to13", "page": "tool14to13"},
+  {"key": "texturesplitter", "page": "texturesplitter"},
+  {"key": "oggconvert", "page": "oggconvert"},
+  {"key": "tmodunpacker", "page": "tmodunpacker"},
+  {"key": "xnbcompiler", "page": "xnbcompiler"},
+  {"key": "asepriteplugin", "page": "aseprite-plugin"},
+  {"key": "stats", "page": "stats"},
+  {"key": "settings", "page": "settings"}
+]

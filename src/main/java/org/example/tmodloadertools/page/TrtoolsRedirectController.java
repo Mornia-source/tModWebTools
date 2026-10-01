@@ -1,6 +1,8 @@
 package org.example.tmodloadertools.page;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.CacheControl;
@@ -10,147 +12,93 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Controller
 public class TrtoolsRedirectController {
 
-    // 浣跨敤銆屼粎璺緞銆嶇殑 Location锛堝 /?tool=锛夛紝涓嶇敤 redirect: 瀛楃涓层€?
-    // 鍚﹀垯 Servlet 浼氭寜 X-Forwarded-Proto 鏈€忎紶鏃剁敓鎴?http://鈥︼紝鍦?HTTPS iframe 閲岃Е鍙?Mixed Content 鎷︽埅銆?
-    private static ResponseEntity<Void> redirectRootTool(String tool) {
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/?tool=" + tool)).build();
+    private final ResourceLoader resourceLoader;
+    private final ToolRegistry registry;
+    private final RequestMappingHandlerMapping handlerMapping;
+
+    public TrtoolsRedirectController(ResourceLoader resourceLoader, ToolRegistry registry,
+                                     RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        this.resourceLoader = resourceLoader;
+        this.registry = registry;
+        this.handlerMapping = requestMappingHandlerMapping;
     }
 
-    @GetMapping("/oggconvert.html")
-    public ResponseEntity<Void> ogg() {
-        return redirectRootTool("oggconvert");
+    /**
+     * 按工具清单（tools.json）为每个工具注册两条路由：
+     * - /{page}.html          → 302 到 /?tool={key}（根页 iframe 外壳）
+     * - /trtools/{page}.html  → 直接返回工具页 HTML
+     * 切片图工具的 page 为 index，不注册根路径跳转，避免与根页 /index.html 冲突。
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void registerToolRoutes() throws NoSuchMethodException {
+        Method redirect = getClass().getMethod("redirectToRoot", HttpServletRequest.class);
+        Method serve = getClass().getMethod("serveToolPage", HttpServletRequest.class);
+        RequestMappingInfo.BuilderConfiguration config = handlerMapping.getBuilderConfiguration();
+        for (ToolRegistry.Tool tool : registry.tools()) {
+            if (!"index".equals(tool.page())) {
+                handlerMapping.registerMapping(
+                        RequestMappingInfo.paths("/" + tool.page() + ".html").methods(RequestMethod.GET).options(config).build(),
+                        this, redirect);
+            }
+            handlerMapping.registerMapping(
+                    RequestMappingInfo.paths("/trtools/" + tool.page() + ".html").methods(RequestMethod.GET).options(config).build(),
+                    this, serve);
+        }
     }
 
-    @GetMapping("/npcframes.html")
-    public ResponseEntity<Void> npcFramesRoot() {
-        return redirectRootTool("npcframes");
+    // 使用「仅路径」的 Location（如 /?tool=），不用 redirect: 字符串。
+    // 否则 Servlet 会在 X-Forwarded-Proto 未透传时生成 http://…，在 HTTPS iframe 里触发 Mixed Content 拦截。
+    public ResponseEntity<Void> redirectToRoot(HttpServletRequest request) {
+        ToolRegistry.Tool tool = registry.byPage(pageOf(request, "/"));
+        if (tool == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("/?tool=" + tool.key())).build();
     }
 
-    @GetMapping("/armorhelper.html")
-    public ResponseEntity<Void> armorHelper() {
-        return redirectRootTool("armorhelper");
+    // 始终直接返回 classpath 静态 HTML，不再根据 embed 做 redirect:/，
+    // 避免 Cloudflare / 多层反代下 Location 异常、iframe 内重定向链卡住等问题。
+    public ResponseEntity<byte[]> serveToolPage(HttpServletRequest request) {
+        String page = pageOf(request, "/trtools/");
+        if (registry.byPage(page) == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Resource r = resourceLoader.getResource("classpath:/static/trtools/html/" + page + ".html");
+        if (!r.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        try {
+            byte[] bytes = r.getInputStream().readAllBytes();
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noStore())
+                    .contentType(MediaType.TEXT_HTML)
+                    .body(bytes);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
-    @GetMapping("/tool14to13.html")
-    public ResponseEntity<Void> tool14To13() {
-        return redirectRootTool("tool14to13");
-    }
-
-    @GetMapping("/spritetransform.html")
-    public ResponseEntity<Void> spriteTransform() {
-        return redirectRootTool("spritetransform");
-    }
-
-    @GetMapping("/aseprite-plugin.html")
-    public ResponseEntity<Void> asepritePluginRoot() {
-        return redirectRootTool("asepriteplugin");
-    }
-
-    @GetMapping("/texturesplitter.html")
-    public ResponseEntity<Void> textureSplitter() {
-        return redirectRootTool("texturesplitter");
-    }
-
-    @GetMapping("/stats.html")
-    public ResponseEntity<Void> statsRoot() {
-        return redirectRootTool("stats");
-    }
-
-    @GetMapping("/settings.html")
-    public ResponseEntity<Void> settingsRoot() {
-        return redirectRootTool("settings");
-    }
-
-    @GetMapping("/xnbcompiler.html")
-    public ResponseEntity<Void> xnbCompilerRoot() {
-        return redirectRootTool("xnbcompiler");
-    }
-
-    @GetMapping("/tmodunpacker.html")
-    public ResponseEntity<Void> tmodUnpackerRoot() {
-        return redirectRootTool("tmodunpacker");
-    }
-
-    @GetMapping("/effecteditor.html")
-    public ResponseEntity<Void> effectEditorRoot() {
-        return redirectRootTool("effecteditor");
-    }
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
-    @GetMapping("/trtools/index.html")
-    public ResponseEntity<byte[]> trtoolsIndex() {
-        return serveTrtoolsHtml("index");
-    }
-
-    @GetMapping("/trtools/effecteditor.html")
-    public ResponseEntity<byte[]> trtoolsEffectEditor() {
-        return serveTrtoolsHtml("effecteditor");
-    }
-
-    @GetMapping("/trtools/oggconvert.html")
-    public ResponseEntity<byte[]> trtoolsOgg() {
-        return serveTrtoolsHtml("oggconvert");
-    }
-
-    @GetMapping("/trtools/npcframes.html")
-    public ResponseEntity<byte[]> trtoolsNpcFrames() {
-        return serveTrtoolsHtml("npcframes");
-    }
-
-    @GetMapping("/trtools/armorhelper.html")
-    public ResponseEntity<byte[]> trtoolsArmor() {
-        return serveTrtoolsHtml("armorhelper");
-    }
-
-    @GetMapping("/trtools/tool14to13.html")
-    public ResponseEntity<byte[]> trtoolsTool14To13() {
-        return serveTrtoolsHtml("tool14to13");
-    }
-
-    @GetMapping("/trtools/spritetransform.html")
-    public ResponseEntity<byte[]> trtoolsSprite() {
-        return serveTrtoolsHtml("spritetransform");
-    }
-
-    @GetMapping("/trtools/aseprite-plugin.html")
-    public ResponseEntity<byte[]> trtoolsAsepritePlugin() {
-        return serveTrtoolsHtml("aseprite-plugin");
-    }
-
-    @GetMapping("/trtools/texturesplitter.html")
-    public ResponseEntity<byte[]> trtoolsTextureSplitter() {
-        return serveTrtoolsHtml("texturesplitter");
-    }
-
-    @GetMapping("/trtools/stats.html")
-    public ResponseEntity<byte[]> trtoolsStats() {
-        return serveTrtoolsHtml("stats");
-    }
-
-    @GetMapping("/trtools/settings.html")
-    public ResponseEntity<byte[]> trtoolsSettings() {
-        return serveTrtoolsHtml("settings");
-    }
-
-    @GetMapping("/trtools/xnbcompiler.html")
-    public ResponseEntity<byte[]> trtoolsXnbCompiler() {
-        return serveTrtoolsHtml("xnbcompiler");
-    }
-
-    @GetMapping("/trtools/tmodunpacker.html")
-    public ResponseEntity<byte[]> trtoolsTmodUnpacker() {
-        return serveTrtoolsHtml("tmodunpacker");
+    /** 前端读取的工具清单：window.TWT_TOOLS = [...] */
+    @GetMapping("/trtools/js/tool-registry.js")
+    public ResponseEntity<byte[]> toolRegistryScript() {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noCache())
+                .contentType(new MediaType("text", "javascript", StandardCharsets.UTF_8))
+                .body(registry.registryScript().getBytes(StandardCharsets.UTF_8));
     }
 
     @GetMapping("/download/armor-preview-1413.aseprite-extension")
@@ -170,23 +118,12 @@ public class TrtoolsRedirectController {
         }
     }
 
-    // 濮嬬粓鐩存帴杩斿洖 classpath 闈欐€?HTML锛屼笉鍐嶆牴鎹?embed 鍋?redirect:/銆?
-    // 閬垮厤 Cloudflare / 澶氬眰鍙嶄唬涓?Location 寮傚父銆乮frame 鍐呴噸瀹氬悜閾惧崱浣忕瓑闂銆?
-    private ResponseEntity<byte[]> serveTrtoolsHtml(String fileBaseName) {
-        String classpathPath = "classpath:/static/trtools/html/" + fileBaseName + ".html";
-        Resource r = resourceLoader.getResource(classpathPath);
-        if (!r.exists()) {
-            return ResponseEntity.notFound().build();
+    // "/trtools/npcframes.html" + "/trtools/" → "npcframes"
+    private static String pageOf(HttpServletRequest request, String prefix) {
+        String uri = request.getRequestURI();
+        if (!uri.startsWith(prefix) || !uri.endsWith(".html")) {
+            return "";
         }
-        try {
-            byte[] bytes = r.getInputStream().readAllBytes();
-            return ResponseEntity
-                    .ok()
-                    .cacheControl(CacheControl.noStore())
-                    .contentType(MediaType.TEXT_HTML)
-                    .body(bytes);
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return uri.substring(prefix.length(), uri.length() - ".html".length());
     }
 }

@@ -22,10 +22,16 @@ function armorModeLabel(m) {
   return t === m.labelKey ? m.label : t;
 }
 
-const frontArmOffsets = [0, -1, -1, -1, -1, 0, 0, 0, 1, 2, 2, 1, 0, 0];
-const backArmOffsets = [0, 1, 1, 1, 0, 0, 0, 0, -1, -2, -2, -1, 0, 0];
-const bodyHeadOffsets = [0, 0, 0, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0];
-const legMapping = [[5], [7], [8], [9], [10], [13], [14], [15], [16], [17, 18]];
+// 模板拆解规则与 NPC帧图生成器共用（armor-template.js）
+const {
+  createPixelCanvas,
+  actionFrontArm,
+  actionHead,
+  actionBody,
+  actionLegs,
+  fileToCanvas,
+  normalizeTemplateCanvas: normalizeArmorTemplateCanvas
+} = window.TWT_ARMOR_TPL;
 
 const el = (id) => document.getElementById(id);
 const refs = {
@@ -140,148 +146,10 @@ function resetOutputPreview() {
   if (refs.outputScroller) refs.outputScroller.classList.add("previewFrame--empty");
 }
 
-async function fileToCanvas(file) {
-  const bmp = await createImageBitmap(file);
-  const c = document.createElement("canvas");
-  c.width = bmp.width;
-  c.height = bmp.height;
-  c.getContext("2d").drawImage(bmp, 0, 0);
-  return c;
-}
-
-// 模板必须为 128×80；常见误用是导出为 2×（256×160）等整数倍，这里降为 128×80（最近邻）。
-// @returns {{ ok: boolean, canvas: HTMLCanvasElement, scale: number|null, w: number, h: number }}
-function normalizeArmorTemplateCanvas(src) {
-  const w = src.width;
-  const h = src.height;
-  if (w === 128 && h === 80) {
-    return { ok: true, canvas: src, scale: 1, w, h };
-  }
-  const kw = w / 128;
-  const kh = h / 80;
-  if (kw === kh && Number.isInteger(kw) && kw >= 2) {
-    const out = createPixelCanvas(128, 80);
-    const ctx = out.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(src, 0, 0, w, h, 0, 0, 128, 80);
-    return { ok: true, canvas: out, scale: kw, w, h };
-  }
-  return { ok: false, canvas: src, scale: null, w, h };
-}
-
-function createPixelCanvas(w, h) {
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d");
-  ctx.imageSmoothingEnabled = false;
-  return c;
-}
-
 function upscale2x(src) {
   const out = createPixelCanvas(src.width * 2, src.height * 2);
   out.getContext("2d").drawImage(src, 0, 0, out.width, out.height);
   return out;
-}
-
-function copyRect(sourceCtx, destCtx, sx, sy, sw, sh, dx, dy, ignored = null) {
-  const src = sourceCtx.getImageData(sx, sy, sw, sh);
-  const dst = destCtx.getImageData(dx, dy, sw, sh);
-  const ignoreSet = new Set((ignored || []).map(([x, y]) => `${x},${y}`));
-
-  for (let y = 0; y < sh; y++) {
-    for (let x = 0; x < sw; x++) {
-      const i = (y * sw + x) * 4;
-      const a = src.data[i + 3];
-      if (a <= 1) continue;
-      if (ignoreSet.has(`${sx + x},${sy + y}`)) continue;
-      dst.data[i] = src.data[i];
-      dst.data[i + 1] = src.data[i + 1];
-      dst.data[i + 2] = src.data[i + 2];
-      dst.data[i + 3] = a;
-    }
-  }
-
-  destCtx.putImageData(dst, dx, dy);
-}
-
-function fillRect(destCtx, x, y, w, h, rgba = [0, 0, 0, 0]) {
-  const img = destCtx.getImageData(x, y, w, h);
-  for (let i = 0; i < img.data.length; i += 4) {
-    img.data[i] = rgba[0];
-    img.data[i + 1] = rgba[1];
-    img.data[i + 2] = rgba[2];
-    img.data[i + 3] = rgba[3];
-  }
-  destCtx.putImageData(img, x, y);
-}
-
-function actionFrontArm(srcCtx, dstCtx) {
-  copyRect(srcCtx, dstCtx, 1, 1, 12, 16, 0, 9);
-  copyRect(srcCtx, dstCtx, 14, 1, 12, 16, 0, 33);
-  copyRect(srcCtx, dstCtx, 27, 1, 16, 16, 2, 61);
-  copyRect(srcCtx, dstCtx, 44, 1, 17, 16, 2, 92);
-  copyRect(srcCtx, dstCtx, 62, 1, 16, 16, 2, 121);
-  copyRect(srcCtx, dstCtx, 14, 1, 12, 16, 0, 145, [[22, 9], [22, 10], [22, 11], [22, 12]]);
-
-  for (let k = 0; k < 14; k++) {
-    const frame = k + 6;
-    copyRect(srcCtx, dstCtx, 79, 1, 13, 11, frontArmOffsets[k], frame * 28 + 12 + bodyHeadOffsets[frame]);
-  }
-}
-
-function actionBackArm(srcCtx, dstCtx) {
-  const tmp = createPixelCanvas(20, 560);
-  const tctx = tmp.getContext("2d");
-
-  copyRect(srcCtx, tctx, 94, 1, 12, 11, 7, 14);
-  copyRect(srcCtx, tctx, 94, 1, 12, 11, 8, 40);
-  copyRect(srcCtx, tctx, 94, 1, 12, 11, 7, 70);
-
-  for (let k = 0; k < 14; k++) {
-    const frame = k + 6;
-    copyRect(srcCtx, tctx, 94, 1, 12, 11, 8 + backArmOffsets[k], frame * 28 + 12 + bodyHeadOffsets[frame]);
-    if (backArmOffsets[k] === -2) copyRect(srcCtx, tctx, 101, 8, 1, 1, 14, frame * 28 + 18);
-  }
-
-  for (let i = 0; i < 20; i++) fillRect(tctx, 8, 21 + 28 * i, 6, 1, [0, 0, 0, 0]);
-  fillRect(tctx, 0, 0, 13, 560, [0, 0, 0, 0]);
-  copyRect(tctx, dstCtx, 0, 0, 20, 560, 0, 0);
-}
-
-function actionHead(srcCtx, dstCtx) {
-  for (let k = 0; k < 20; k++) copyRect(srcCtx, dstCtx, 1, 19, 20, 28, 0, k * 28 + bodyHeadOffsets[k]);
-}
-
-function actionBody(srcCtx, dstCtx, female = false) {
-  actionBackArm(srcCtx, dstCtx);
-  for (let k = 0; k < 20; k++) {
-    const sy = k === 5 ? 48 : 19;
-    const sx = female ? 44 : 23;
-    const ignored = female || (k !== 1 && k <= 5) ? null : [[37, sy + 16], [37, sy + 17]];
-    copyRect(srcCtx, dstCtx, sx, sy, 20, 28, 0, k * 28 + bodyHeadOffsets[k], ignored);
-  }
-  actionFrontArm(srcCtx, dstCtx);
-}
-
-function actionLegs(srcCtx, dstCtx) {
-  for (let k = 0; k < 7; k++) {
-    const frameY = (k < 5 ? k : (k === 5 ? 11 : 19)) * 28;
-    for (let l = 0; l < 2; l++) {
-      const swap = l === (k === 6 ? 0 : 1);
-      const sx = l === 1 ? 100 : 110;
-      copyRect(srcCtx, dstCtx, sx, 19, 9, 9, swap ? 5 : 7, 19 + frameY, [[sx + 1, 21], [sx + 7, 21]]);
-    }
-  }
-
-  copyRect(srcCtx, dstCtx, 100, 19, 9, 9, 6, 187);
-  copyRect(srcCtx, dstCtx, 100, 19, 9, 9, 6, 355);
-
-  for (let m = 0; m < legMapping.length; m++) {
-    const sx = m >= 5 ? 83 : 66;
-    const sy = 19 + (m % 5) * 10;
-    for (const row of legMapping[m]) copyRect(srcCtx, dstCtx, sx, sy, 16, 9, 3, 19 + row * 28);
-  }
 }
 
 function buildSheet(srcCanvas, modeKey) {

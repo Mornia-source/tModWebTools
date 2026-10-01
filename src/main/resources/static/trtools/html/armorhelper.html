@@ -10,6 +10,7 @@
         var lang = localStorage.getItem("trtools.lang") || "zh-CN";
         var theme = localStorage.getItem("trtools.theme");
         if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
+        theme = "national"; // FORCE_THEME：国庆期间强制，节后删除此行
         var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
         var TBOOT = {
           "meta.titleHome": { zh: "tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry", en: "tModWebTools — Respecting every developer's wishes — Mornia-Cherry", es: "tModWebTools — Respetando los deseos de cada desarrollador — Mornia-Cherry" },
@@ -149,10 +150,12 @@
   <script defer src="/trtools/js/i18n.js"></script>
   <script defer src="/trtools/js/sidebar-shared.js"></script>
 
+  <script defer src="/trtools/js/tool-registry.js"></script>
   <script defer src="/trtools/js/hot-switch.js"></script>
   <script defer src="/trtools/js/app-shell.js"></script>
   <script defer src="/trtools/js/online_client.js"></script>
   <script defer src="/trtools/js/visit-track.js"></script>
+  <script defer src="/trtools/js/armor-template.js"></script>
   <script defer src="/trtools/js/armorhelper.js"></script>
 </body>
 </html>

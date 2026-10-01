@@ -3,21 +3,11 @@
 
   var STORAGE_KEY = "trtoolsTool";
   var overlay = null;
-  var FILE_TO_TOOL = {
-    "index.html": "tilesheet",
-    "oggconvert.html": "oggconvert",
-    "armorhelper.html": "armorhelper",
-    "npcframes.html": "npcframes",
-    "tool14to13.html": "tool14to13",
-    "aseprite-plugin.html": "asepriteplugin",
-    "spritetransform.html": "spritetransform",
-    "texturesplitter.html": "texturesplitter",
-    "stats.html": "stats",
-    "settings.html": "settings",
-    "tmodunpacker.html": "tmodunpacker",
-    "xnbcompiler.html": "xnbcompiler",
-    "effecteditor.html": "effecteditor"
-  };
+  // 工具清单唯一来源：/trtools/tools.json（由 tool-registry.js 提供为 window.TWT_TOOLS，需先于本文件加载）
+  var FILE_TO_TOOL = {};
+  (window.TWT_TOOLS || []).forEach(function (t) {
+    FILE_TO_TOOL[t.page + ".html"] = t.key;
+  });
 
   function currentFile() {
     return location.pathname.split("/").pop() || "";

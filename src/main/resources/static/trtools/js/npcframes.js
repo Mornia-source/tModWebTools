@@ -10,11 +10,8 @@
   const FW = 20; // 美术像素帧宽
   const FH = 28; // 美术像素帧高
 
-  // —— 与装备帧生成器（armorhelper.js）相同的模板拆解规则 ——
-  const frontArmOffsets = [0, -1, -1, -1, -1, 0, 0, 0, 1, 2, 2, 1, 0, 0];
-  const backArmOffsets = [0, 1, 1, 1, 0, 0, 0, 0, -1, -2, -2, -1, 0, 0];
-  const bodyHeadOffsets = [0, 0, 0, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0];
-  const legMapping = [[5], [7], [8], [9], [10], [13], [14], [15], [16], [17, 18]];
+  // 模板拆解规则与装备帧生成器共用（armor-template.js）
+  const { actionFrontArm, actionBackArm, actionHead, actionTorso, actionLegs, ctx2d, fileToCanvas } = window.TWT_ARMOR_TPL;
 
   // 手臂姿势：1.4 身体贴图第 0 行 (3,0)~(6,0)，对应玩家帧 1~4 的挥动手臂
   const POSES = [
@@ -85,40 +82,6 @@
     return c;
   }
 
-  function ctx2d(c) {
-    return c.getContext("2d", { willReadFrequently: true });
-  }
-
-  function copyRect(sourceCtx, destCtx, sx, sy, sw, sh, dx, dy, ignored = null) {
-    const src = sourceCtx.getImageData(sx, sy, sw, sh);
-    const dst = destCtx.getImageData(dx, dy, sw, sh);
-    const ignoreSet = new Set((ignored || []).map(([x, y]) => `${x},${y}`));
-    for (let y = 0; y < sh; y++) {
-      for (let x = 0; x < sw; x++) {
-        const i = (y * sw + x) * 4;
-        const a = src.data[i + 3];
-        if (a <= 1) continue;
-        if (ignoreSet.has(`${sx + x},${sy + y}`)) continue;
-        dst.data[i] = src.data[i];
-        dst.data[i + 1] = src.data[i + 1];
-        dst.data[i + 2] = src.data[i + 2];
-        dst.data[i + 3] = a;
-      }
-    }
-    destCtx.putImageData(dst, dx, dy);
-  }
-
-  function fillRect(destCtx, x, y, w, h, rgba) {
-    const img = destCtx.getImageData(x, y, w, h);
-    for (let i = 0; i < img.data.length; i += 4) {
-      img.data[i] = rgba[0];
-      img.data[i + 1] = rgba[1];
-      img.data[i + 2] = rgba[2];
-      img.data[i + 3] = rgba[3];
-    }
-    destCtx.putImageData(img, x, y);
-  }
-
   // 把 src 叠加到 dst 的 (dx,dy)；越界部分裁掉
   function overlay(dst, src, dx = 0, dy = 0) {
     dst.getContext("2d").drawImage(src, dx, dy);
@@ -129,66 +92,6 @@
     const c = canvas(FW, FH * 20);
     fn(tplCtx, ctx2d(c));
     return c;
-  }
-
-  function actionFrontArm(s, d) {
-    copyRect(s, d, 1, 1, 12, 16, 0, 9);
-    copyRect(s, d, 14, 1, 12, 16, 0, 33);
-    copyRect(s, d, 27, 1, 16, 16, 2, 61);
-    copyRect(s, d, 44, 1, 17, 16, 2, 92);
-    copyRect(s, d, 62, 1, 16, 16, 2, 121);
-    copyRect(s, d, 14, 1, 12, 16, 0, 145, [[22, 9], [22, 10], [22, 11], [22, 12]]);
-    for (let k = 0; k < 14; k++) {
-      const frame = k + 6;
-      copyRect(s, d, 79, 1, 13, 11, frontArmOffsets[k], frame * 28 + 12 + bodyHeadOffsets[frame]);
-    }
-  }
-
-  function actionBackArm(s, d) {
-    const tmp = canvas(20, 560);
-    const t = ctx2d(tmp);
-    copyRect(s, t, 94, 1, 12, 11, 7, 14);
-    copyRect(s, t, 94, 1, 12, 11, 8, 40);
-    copyRect(s, t, 94, 1, 12, 11, 7, 70);
-    for (let k = 0; k < 14; k++) {
-      const frame = k + 6;
-      copyRect(s, t, 94, 1, 12, 11, 8 + backArmOffsets[k], frame * 28 + 12 + bodyHeadOffsets[frame]);
-      if (backArmOffsets[k] === -2) copyRect(s, t, 101, 8, 1, 1, 14, frame * 28 + 18);
-    }
-    for (let i = 0; i < 20; i++) fillRect(t, 8, 21 + 28 * i, 6, 1, [0, 0, 0, 0]);
-    fillRect(t, 0, 0, 13, 560, [0, 0, 0, 0]);
-    copyRect(t, d, 0, 0, 20, 560, 0, 0);
-  }
-
-  function actionHead(s, d) {
-    for (let k = 0; k < 20; k++) copyRect(s, d, 1, 19, 20, 28, 0, k * 28 + bodyHeadOffsets[k]);
-  }
-
-  function actionTorso(s, d, female) {
-    for (let k = 0; k < 20; k++) {
-      const sy = k === 5 ? 48 : 19;
-      const sx = female ? 44 : 23;
-      const ignored = female || (k !== 1 && k <= 5) ? null : [[37, sy + 16], [37, sy + 17]];
-      copyRect(s, d, sx, sy, 20, 28, 0, k * 28 + bodyHeadOffsets[k], ignored);
-    }
-  }
-
-  function actionLegs(s, d) {
-    for (let k = 0; k < 7; k++) {
-      const frameY = (k < 5 ? k : (k === 5 ? 11 : 19)) * 28;
-      for (let l = 0; l < 2; l++) {
-        const swap = l === (k === 6 ? 0 : 1);
-        const sx = l === 1 ? 100 : 110;
-        copyRect(s, d, sx, 19, 9, 9, swap ? 5 : 7, 19 + frameY, [[sx + 1, 21], [sx + 7, 21]]);
-      }
-    }
-    copyRect(s, d, 100, 19, 9, 9, 6, 187);
-    copyRect(s, d, 100, 19, 9, 9, 6, 355);
-    for (let m = 0; m < legMapping.length; m++) {
-      const sx = m >= 5 ? 83 : 66;
-      const sy = 19 + (m % 5) * 10;
-      for (const row of legMapping[m]) copyRect(s, d, sx, sy, 16, 9, 3, 19 + row * 28);
-    }
   }
 
   function frameOf(sheet, k) {
@@ -694,13 +597,6 @@
   });
 
   // ---------- 输入 ----------
-  async function fileToCanvas(file) {
-    const bmp = await createImageBitmap(file);
-    const c = canvas(bmp.width, bmp.height);
-    c.getContext("2d").drawImage(bmp, 0, 0);
-    return c;
-  }
-
   // 按整数倍最近邻缩放到目标尺寸；不是整数倍则返回 null
   function normalizeTo(src, w, h) {
     const k = src.width / w;

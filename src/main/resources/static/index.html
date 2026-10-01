@@ -13,25 +13,16 @@
 <body>
   <iframe id="toolFrame" title="tool"></iframe>
 
+  <script src="/trtools/js/tool-registry.js"></script>
   <script>
     (function () {
       var STORAGE_KEY = "trtoolsTool";
       var params = new URLSearchParams(location.search);
-      var map = {
-        tilesheet: "index",
-        oggconvert: "oggconvert",
-        armorhelper: "armorhelper",
-        npcframes: "npcframes",
-        tool14to13: "tool14to13",
-        asepriteplugin: "aseprite-plugin",
-        spritetransform: "spritetransform",
-        texturesplitter: "texturesplitter",
-        stats: "stats",
-        settings: "settings",
-        tmodunpacker: "tmodunpacker",
-        xnbcompiler: "xnbcompiler",
-        effecteditor: "effecteditor"
-      };
+      // 工具清单唯一来源：/trtools/tools.json（由 /trtools/js/tool-registry.js 提供为 window.TWT_TOOLS）
+      var map = {};
+      (window.TWT_TOOLS || [{ key: "tilesheet", page: "index" }]).forEach(function (t) {
+        map[t.key] = t.page;
+      });
 
       var q = params.get("tool");
       var tool;

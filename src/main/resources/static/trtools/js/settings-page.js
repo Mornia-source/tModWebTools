@@ -15,7 +15,10 @@
   }
 
   function syncThemeSwatches() {
-    var th = I.getTheme();
+    // 显示用户自己的选择；节日强制主题期间给出提示
+    var th = I.getChosenTheme ? I.getChosenTheme() : I.getTheme();
+    var hint = document.getElementById("themeForceHint");
+    if (hint) hint.hidden = !I.forcedTheme;
     document.querySelectorAll("#themeSwatches .settingsSwatch").forEach(function (b) {
       var on = b.getAttribute("data-theme") === th;
       b.setAttribute("aria-pressed", on ? "true" : "false");

@@ -10,6 +10,7 @@
         var lang = localStorage.getItem("trtools.lang") || "zh-CN";
         var theme = localStorage.getItem("trtools.theme");
         if (localStorage.getItem("trtools.themeChosen") !== "1" && (!theme || theme === "emerald")) theme = "national";
+        theme = "national"; // FORCE_THEME：国庆期间强制，节后删除此行
         var lt = lang === "en" ? "en" : lang === "es" ? "es" : "zh";
         var TBOOT = {
           "meta.titleHome": { zh: "tModWebTools - 尊重每一位开发者的意愿 - Mornia-Cherry", en: "tModWebTools — Respecting every developer's wishes — Mornia-Cherry", es: "tModWebTools — Respetando los deseos de cada desarrollador — Mornia-Cherry" },
@@ -72,6 +73,7 @@
 
         <section class="card panel" style="margin-top:16px">
           <div class="sectionTitle" data-i18n="settings.themeTitle">主题色</div>
+          <div class="hint" id="themeForceHint" hidden style="margin:0 0 10px" data-i18n="settings.themeForced">国庆期间全站统一使用国庆主题；在这里选择的主题会保存，节后自动生效。</div>
           <div class="settingsSwatchRow" id="themeSwatches" role="group" data-i18n-aria="settings.themeTitle" aria-label="主题色">
             <button type="button" class="settingsSwatch settingsSwatch--national" data-theme="national" title="国庆" aria-pressed="false" data-i18n-title="settings.themeNational"></button>
             <button type="button" class="settingsSwatch" data-theme="emerald" style="background:#3bbf7a" title="Emerald" aria-pressed="false" data-i18n-title="settings.themeEmerald"></button>
@@ -100,6 +102,7 @@
   <script defer src="/trtools/js/i18n.js"></script>
   <script defer src="/trtools/js/sidebar-shared.js"></script>
 
+  <script defer src="/trtools/js/tool-registry.js"></script>
   <script defer src="/trtools/js/hot-switch.js"></script>
   <script defer src="/trtools/js/app-shell.js"></script>
   <script defer src="/trtools/js/visit-track.js"></script>
