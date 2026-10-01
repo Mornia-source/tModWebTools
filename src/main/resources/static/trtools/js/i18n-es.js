@@ -16,6 +16,7 @@ window.__TWT_ES = {
   "nav.armor": "ArmorHelper",
   "meta.titleNpcFrames": "Generador de fotogramas NPC — tModWebTools",
   "nav.npcFrames": "Generador de fotogramas NPC",
+  "nav.badgeNewTool": "Nuevo",
   "npcf.h1": "Generador de fotogramas NPC",
   "nav.sprite": "SpriteTransform",
   "nav.ogg": "Conversión OGG",

@@ -471,3 +471,42 @@ textarea.textInput:focus {
 .appNav .appNavLink.appNavLink--ext:hover > .appNavExtIcon {
   opacity: 0.9;
 }
+
+/* “新工具”闪卡徽标：镭射渐变底 + 周期性扫过的斜向高光 */
+.appNav .appNavLink.pageTab > .appNavBadge--shine,
+.appNav .appNavLink.pageTab:hover > .appNavBadge--shine,
+.appNav .appNavLink.pageTab.active > .appNavBadge--shine {
+  position: relative;
+  overflow: hidden;
+  color: #5b2a00;
+  border-color: #e0b13a;
+  background: linear-gradient(115deg, #fff1b8 0%, #ffd56b 30%, #ffe9f2 50%, #c9f0ff 70%, #ffe08a 100%);
+  background-size: 220% 100%;
+  animation: twtBadgeHolo 4s ease-in-out infinite alternate;
+  box-shadow: 0 0 0 0 rgba(255, 196, 64, 0.6);
+}
+.appNav .appNavLink.pageTab > .appNavBadge--shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+  transform: rotate(20deg);
+  animation: twtBadgeShine 2.6s ease-in-out infinite;
+}
+@keyframes twtBadgeShine {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+@keyframes twtBadgeHolo {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .appNav .appNavLink.pageTab > .appNavBadge--shine,
+  .appNav .appNavLink.pageTab > .appNavBadge--shine::after {
+    animation: none;
+  }
+}
