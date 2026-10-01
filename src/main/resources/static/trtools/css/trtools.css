@@ -1269,3 +1269,6 @@ canvas{ width:100%; height:auto; border:1px solid var(--line); border-radius:16p
   .twtSampleHost{ padding-right:12px; }
   .twtSample{ position:relative; top:auto; right:auto; margin:0 auto 22px; }
 }
+
+/* 工具图标不可拖拽/选中（右键菜单由 app-shell.js 拦截） */
+.tabIcon, .appPageIcon, .appNavLink img, .tabs .tab img, .pluginLogo, .tsRichSelectIcon, .tsRichOption img{ -webkit-user-drag:none; user-select:none; }

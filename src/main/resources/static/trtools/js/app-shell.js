@@ -194,12 +194,16 @@
     } catch (_) {}
   });
 
-  // 示例模板图：不提供右键/拖拽获取原图
+  // 示例模板图与工具图标：不提供右键菜单（另存为/打开图片）与拖拽获取
+  var PROTECTED = ".twtSample, .tabIcon, .appPageIcon, .appNavLink img, .tabs .tab img, .pluginLogo, .tsRichSelectIcon, .tsRichOption img";
+  function isProtected(t) {
+    return !!(t && t.closest && t.closest(PROTECTED));
+  }
   document.addEventListener("contextmenu", function (e) {
-    if (e.target && e.target.closest && e.target.closest(".twtSample")) e.preventDefault();
+    if (isProtected(e.target)) e.preventDefault();
   });
   document.addEventListener("dragstart", function (e) {
-    if (e.target && e.target.closest && e.target.closest(".twtSample")) e.preventDefault();
+    if (isProtected(e.target)) e.preventDefault();
   });
 })();
 
