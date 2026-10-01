@@ -40,6 +40,11 @@
     .npcfOpts label{display:flex;flex-direction:column;gap:4px;font-size:12px;margin:0}
     .npcfOpts label.npcfCheck{flex-direction:row;align-items:center;gap:8px;grid-column:1/-1}
     .npcfOpts select,.npcfOpts input[type=number]{width:100%;box-sizing:border-box}
+    .npcfDrop{position:relative;padding-right:150px}
+    .npcfSample{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;font-size:11px;color:var(--muted)}
+    .npcfSample img{display:block;width:128px;height:auto;image-rendering:pixelated;border:1px solid var(--line);border-radius:4px;background:#fff}
+    .npcfSample:hover img{outline:2px solid rgb(var(--twt-accent))}
+    @media (max-width:640px){.npcfDrop{padding-right:12px}.npcfSample{position:static;margin:0 auto 8px}}
     .npcfFaceHost{overflow:auto;max-width:100%}
     .npcfFace{width:280px;height:392px;image-rendering:pixelated;cursor:crosshair;border:1px solid var(--line);border-radius:6px;background:repeating-conic-gradient(rgba(0,0,0,.06) 0 25%,transparent 0 50%) 0 0/14px 14px}
     .npcfAnimRow{display:flex;align-items:flex-end;gap:16px;margin-bottom:12px}
@@ -79,7 +84,11 @@
           <section class="card panel">
             <div class="sectionTitle" data-i18n="npcf.inTitle">输入模板</div>
             <div class="filePicker">
-              <div class="drop" id="npcTplDrop">
+              <div class="drop npcfDrop" id="npcTplDrop">
+                <a class="npcfSample" href="/trtools/img/npcframes/sample-armor-template.png" target="_blank" rel="noopener" data-i18n-title="npcf.sampleTip" title="示例模板，点击查看原图">
+                  <img src="/trtools/img/npcframes/sample-armor-template.png" alt="" width="128" height="80" />
+                  <span data-i18n="npcf.sample">示例</span>
+                </a>
                 <div style="font-weight:800" data-i18n="npcf.tplMain">① 装备帧模板（128×80，必需）</div>
                 <div class="hint" data-i18n="npcf.tplHint">与“装备帧生成器”使用同一张模板：头、身体、腿、手臂。</div>
                 <input id="npcTplFile" class="hiddenFileInput" type="file" accept="image/png,image/bmp" />
@@ -90,7 +99,11 @@
               </div>
             </div>
             <div class="filePicker" style="margin-top:10px">
-              <div class="drop" id="npcBodyDrop">
+              <div class="drop npcfDrop" id="npcBodyDrop">
+                <a class="npcfSample" href="/trtools/img/npcframes/sample-body14-template.png" target="_blank" rel="noopener" data-i18n-title="npcf.sampleTip" title="示例模板，点击查看原图">
+                  <img src="/trtools/img/npcframes/sample-body14-template.png" alt="" width="128" height="95" />
+                  <span data-i18n="npcf.sample">示例</span>
+                </a>
                 <div style="font-weight:800" data-i18n="npcf.bodyMain">② 1.4 身体贴图（360×224）</div>
                 <div class="hint" data-i18n="npcf.bodyHint">提供手势帧与攻击帧的手臂（第 0 行 (3,0)~(6,0)，或第 1 行 (3,1)~(6,1)）。未上传时改用模板①里的手臂。</div>
                 <input id="npcBodyFile" class="hiddenFileInput" type="file" accept="image/png,image/bmp" />
@@ -118,9 +131,9 @@
               <label><span data-i18n="npcf.atkDy">攻击：手臂下移</span><input id="npcAtkDy" type="number" value="0" step="1" /></label>
               <label class="npcfCheck"><input id="npcAtkHideFront" type="checkbox" /><span data-i18n="npcf.atkHideFront">攻击帧去掉原本同侧的手臂（换手）</span></label>
               <label class="npcfCheck"><input id="npcAtkUnder" type="checkbox" checked /><span data-i18n="npcf.atkUnder">攻击手臂画在身体下方</span></label>
-              <label class="npcfCheck"><input id="npcFaceLeft" type="checkbox" checked /><span data-i18n="npcf.faceLeft">输出朝左（原版城镇 NPC 贴图朝左）</span></label>
+              <label class="npcfCheck"><input id="npcFaceLeft" type="checkbox" /><span data-i18n="npcf.faceLeft">水平翻转输出（朝左）</span></label>
             </div>
-            <div class="hint" data-i18n="npcf.unitHint">偏移单位为模板像素（输出时放大 2 倍）；左右方向以最终输出的帧图为准。</div>
+            <div class="hint" data-i18n="npcf.unitHint">偏移单位为模板像素（输出时放大 2 倍）；左右方向以输出的帧图（默认朝右）为准。</div>
 
             <div class="sectionTitle" data-i18n="npcf.faceTitle">眼睛与嘴巴</div>
             <div class="hint" data-i18n="npcf.faceHint">点击像素切换标记。蓝色为眼睛：眨眼帧会取眼睛右侧的皮肤色向左覆盖，再画黑线。粉色为嘴巴：说话帧在这里画黑色像素。</div>

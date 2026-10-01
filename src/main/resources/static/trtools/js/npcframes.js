@@ -306,8 +306,9 @@
     return groups;
   }
 
-  // 眨眼：每只眼睛逐行取（输出朝向下）右侧一格的皮肤色覆盖（右侧不可用时取左侧），
-  // 再只在这只眼睛最下面一行画黑线——两格高的眼睛闭上后是一格高的黑线
+  // 眨眼：先统计所有眼睛两侧可用像素的颜色，出现最多的视为皮肤色（头发只会出现在个别眼睛旁边）；
+  // 每只眼睛逐行从两侧挑最接近皮肤色的一格覆盖，再只在这只眼睛最下面一行画黑线
+  //（两格高的眼睛闭上后是一格高的黑线）
   function blinkFrame(base) {
     const c = canvas(FW, FH);
     overlay(c, base);
@@ -319,20 +320,45 @@
       const p = pixelAt(img, x, y);
       return p[3] > 0 ? p : null;
     };
-    const black = [];
-    for (const g of eyeGroups()) {
+    const groups = eyeGroups().map((g) => {
       const rows = new Map();
       for (const [x, y] of g) {
         if (!rows.has(y)) rows.set(y, []);
         rows.get(y).push(x);
       }
-      for (const [y, xs] of rows) {
-        // “眼睛右侧”以最终输出朝向为准：朝左输出时对应模板里眼睛的左侧
-        const outRight = refs.faceLeft.checked ? usable(Math.min(...xs) - 1, y) : usable(Math.max(...xs) + 1, y);
-        const outLeft = refs.faceLeft.checked ? usable(Math.max(...xs) + 1, y) : usable(Math.min(...xs) - 1, y);
-        const skin = outRight || outLeft;
-        if (!skin) continue;
-        for (const x of xs) img.data.set(skin, (y * FW + x) * 4);
+      const rowList = [...rows].map(([y, xs]) => ({
+        y,
+        xs,
+        sides: [usable(Math.max(...xs) + 1, y), usable(Math.min(...xs) - 1, y)].filter(Boolean)
+      }));
+      return { g, rowList };
+    });
+
+    const counts = new Map();
+    for (const { rowList } of groups) {
+      for (const r of rowList) {
+        for (const p of r.sides) {
+          const k = p.join(",");
+          counts.set(k, (counts.get(k) || 0) + 1);
+        }
+      }
+    }
+    let skin = null;
+    let best = 0;
+    for (const [k, n] of counts) {
+      if (n > best) {
+        best = n;
+        skin = k.split(",").map(Number);
+      }
+    }
+    const dist = (p) => (p[0] - skin[0]) ** 2 + (p[1] - skin[1]) ** 2 + (p[2] - skin[2]) ** 2;
+
+    const black = [];
+    for (const { g, rowList } of groups) {
+      for (const r of rowList) {
+        if (!skin) break;
+        const fill = r.sides.length ? r.sides.reduce((a, b) => (dist(b) < dist(a) ? b : a)) : skin;
+        for (const x of r.xs) img.data.set(fill, (r.y * FW + x) * 4);
       }
       const bottom = Math.max(...g.map(([, y]) => y));
       const xs = g.map(([x]) => x);
@@ -362,9 +388,6 @@
     push(fullFrame(L, 5), tr("npcf.lJump", "空中"));
     for (let i = 0; i < walkCount; i++) push(fullFrame(L, 6 + i), tr("npcf.lWalk", "行走") + (i + 1));
 
-    // 偏移量按最终输出朝向填写（参考图以朝左的 NPC 贴图为准）；合成在朝右的模板空间进行，朝左输出时水平取反
-    const hx = (v) => (refs.faceLeft.checked ? -v : v);
-
     // 手势 ×2：后侧那只手换成 1.4 身体的手臂姿势，画在躯干后面，前臂保持站立
     for (const sel of [refs.gestA, refs.gestB]) {
       push(idleWithBackArm(L, poseArm(L, parseInt(sel.value, 10))), tr("npcf.lGesture", "手势"));
@@ -373,7 +396,7 @@
     // 坐下：头与躯干（含手臂）下移，腿部站立帧单独平移
     {
       const c = canvas(FW, FH);
-      overlay(c, frameOf(L.legs, 0), hx(intVal(refs.sitLegDx, 1)), intVal(refs.sitLegDy, 0));
+      overlay(c, frameOf(L.legs, 0), intVal(refs.sitLegDx, 1), intVal(refs.sitLegDy, 0));
       const upper = canvas(FW, FH);
       for (const part of [L.backArm, L.torso, L.front, L.head, L.front]) overlay(upper, frameOf(part, 0));
       overlay(c, upper, 0, intVal(refs.sitBodyDy, 1));
@@ -384,7 +407,7 @@
     push(blinkFrame(idle), tr("npcf.lBlink", "眨眼"));
 
     // 攻击 ×4：1.4 身体挥动手臂四帧，默认画在身体下方并右移
-    const atkDx = hx(intVal(refs.atkDx, 3));
+    const atkDx = intVal(refs.atkDx, 3);
     const atkDy = intVal(refs.atkDy, 0);
     const hideSame = refs.atkHideFront.checked;
     for (let p = 0; p < 4; p++) {
@@ -407,7 +430,7 @@
       push(c, tr("npcf.lAttack", "攻击") + (p + 1));
     }
 
-    // 放大 2× 并处理朝向（原版城镇 NPC 贴图朝左）
+    // 放大 2×；默认朝右输出，可选水平翻转为朝左
     const flip = refs.faceLeft.checked;
     state.frames = frames.map((f) => {
       const out = canvas(FW * 2, FH * 2);
