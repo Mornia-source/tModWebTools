@@ -46,7 +46,7 @@ html[data-trtheme="teal"] {
 }
 
 /* ===================== 国庆主题（临时默认） =====================
- * 不只是换色：暖色星纹背景、顶栏红金饰条与“国庆快乐”挂签、金色星标、金色高亮条等。
+ * 不只是换色：暖色星纹背景、顶栏红金分隔线、金色星标、金色高亮条等。
  */
 html[data-trtheme="national"] {
   --twt-accent: 214, 40, 40;
@@ -83,39 +83,11 @@ html[data-trtheme="national"] .appNav .appNavLink.pageTab.active {
   border-color: rgba(var(--twt-gold), 0.7);
 }
 
-/* 顶栏：顶边红金渐变饰条 + 中间悬挂的“国庆快乐”挂签 */
-html[data-trtheme="national"] .appTopBar {
-  position: relative;
-  padding-top: 22px;
-  border-color: rgba(var(--twt-gold), 0.55);
+/* 顶栏：底部分隔线改为红金渐变（不占额外空间，不遮挡标题） */
+html[data-trtheme="national"] .appTopBar.card.panel {
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, rgb(var(--twt-accent)) 0%, rgb(var(--twt-gold)) 50%, rgb(var(--twt-accent)) 100%) 1;
 }
-html[data-trtheme="national"] .appTopBar::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 4px;
-  background: linear-gradient(90deg, rgb(var(--twt-accent)) 0%, rgb(var(--twt-gold)) 50%, rgb(var(--twt-accent)) 100%);
-}
-html[data-trtheme="national"] .appTopBar::after {
-  content: "★ 国庆快乐 ★";
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1px 12px 2px;
-  border-radius: 0 0 8px 8px;
-  background: rgb(var(--twt-accent));
-  color: rgb(255, 222, 120);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  white-space: nowrap;
-  pointer-events: none;
-}
-html[data-trtheme="national"]:lang(en) .appTopBar::after { content: "★ Happy National Day ★"; letter-spacing: 0; }
-html[data-trtheme="national"]:lang(es) .appTopBar::after { content: "★ Feliz Día Nacional ★"; letter-spacing: 0; }
 
 /* 卡片与标题：标题前金星，按钮悬停描金边 */
 html[data-trtheme="national"] .card {
